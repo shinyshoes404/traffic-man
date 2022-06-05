@@ -18,7 +18,7 @@ setup(
     #entry_points = { 'console_scripts' : ['example-command=package.module.function']},
     
     install_requires=[
-        'requests'
+        'requests', 'sqlalchemy'
     ],
 
     extras_require={

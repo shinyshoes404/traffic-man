@@ -8,5 +8,6 @@ testing.py
 .coverage
 dist/
 build/
-*.log*
+*.log
 .VSCodeCounter/
+*.db
