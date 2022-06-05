@@ -1,0 +1,12 @@
+__pycache__/
+venv*/
+.vscode/
+*.egg-info/
+.env
+.vscode/
+testing.py
+.coverage
+dist/
+build/
+*.log*
+.VSCodeCounter/
