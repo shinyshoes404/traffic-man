@@ -1,7 +1,5 @@
 import sqlalchemy as db
-
-
-metadata_obj = db.MetaData()
+from traffic_man import metadata_obj
 
 
 check_times = db.Table(

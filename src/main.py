@@ -1,10 +1,18 @@
-from traffic_man.models import metadata_obj, db, check_times, check_days, holidays, phone_numbers, check_days, traffic_conditions, traffic_data
+from traffic_man import engine
+from traffic_man.db_ops import DataSetup, TrafficDate
+from time import sleep
 
-engine = db.create_engine('sqlite:///traffic_man.db')
+data_setup = DataSetup(engine)
+data_setup.update_check_times()
+data_setup.update_holidays()
+data_setup.update_check_days()
+data_setup.update_phone_numbers()
 
+while True:
+    traffic_date = TrafficDate(engine)
 
-metadata_obj.create_all(engine)
+    sleep_seconds = traffic_date.get_next_run_sleep_seconds()
+    print("sleeping for {0} seonds".format(sleep_seconds))
+    sleep(sleep_seconds)
 
-inspector = db.inspect(engine)
-
-print(inspector.get_table_names())
+    
