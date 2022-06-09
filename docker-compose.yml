@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+ traffic-man:
+ # you can remove the dns section if you want the continer to use the host dns by default, or you can edit these addresses to suite your needs
+  dns: 
+    - "192.168.1.2"
+    - "8.8.8.8"
+  image: traffic-man:latest
+  # fill in the .env file with your account id, keys, phone numbers, etc
+  env_file:
+    - .env
+  tty: true
+  stdin_open: true
+
+  # this is where our log and db file will be
+  volumes:
+   - etc:/etc/traffic-man
+   
+volumes:
+ etc:

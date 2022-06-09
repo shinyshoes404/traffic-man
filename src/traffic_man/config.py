@@ -18,6 +18,7 @@ class Config:
   
     db_path = os.path.join(etc_basedir, "traffic_man.db")
 
+
     ### --- LOG PARAMETERS --- ###
     log_path = os.path.join(etc_basedir, "traffic-man.log")
     log_level = logging.INFO
@@ -45,6 +46,9 @@ class Config:
 
     ### --- TRAFFIC_MAN_PARAMS --- ###
 
+    # traffic overage parameter
+    overage_parameter = 0.5
+
     # times to check traffic condition
     traffic_check_times = [
                             "16:00", 
@@ -57,8 +61,11 @@ class Config:
                             "17:45",
                             "18:00",
                             "18:15",
-                            "18:30"
+                            "18:30",
+                            "18:45",
+                            "19:00"
                             ]
+
 
     # days you don't want to check traffic, because it is a holiday
     holidays =  [
