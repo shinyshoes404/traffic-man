@@ -1,8 +1,7 @@
 import sqlalchemy as db
-
+#from traffic_man import metadata_obj
 
 metadata_obj = db.MetaData()
-
 
 check_times = db.Table(
                 'check_times',
@@ -45,7 +44,7 @@ traffic_data = db.Table(
                 metadata_obj,
                 db.Column('traffic_data_id', db.Integer, primary_key=True),
                 db.Column('datetime', db.String(16), nullable=False),
-                db.Column('origin_adddr', db.String(50), nullable=False),
+                db.Column('origin_addr', db.String(50), nullable=False),
                 db.Column('destination_addr', db.String(50), nullable=False),
                 db.Column('duration_sec', db.Integer, nullable=False),
                 db.Column('duration_traffic_sec', db.Integer, nullable=False),

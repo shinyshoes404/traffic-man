@@ -5,3 +5,4 @@
 *.sh text eol=lf
 id_rsa eol=lf
 id_rsa.pub eol=lf
+.env eol=lf
