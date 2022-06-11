@@ -21,8 +21,6 @@ ENV PY_APP_DIR=${PY_ROOT_DIR}/traffic_man
 ENV ETC_DIR=/etc/traffic-man
 # set the timezone info
 ENV TZ=America/Chicago
-# user that will send file
-ENV FILE_USER=onedrivefile
 
 
 #### ---- BASIC SYSTEM SETUP ---- ####

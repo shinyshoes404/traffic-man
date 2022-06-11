@@ -34,7 +34,7 @@ traffic_conditions = db.Table(
                         'traffic_conditions',
                         metadata_obj,
                         db.Column('condition_id', db.Integer, primary_key=True),
-                        db.Column('date', db.Integer, nullable=False),
+                        db.Column('date', db.String(10), nullable=False),
                         db.Column('bad_traffic_datetime', db.String(16), nullable=False),
                         db.Column('resolve_traffic_datetime', db.String(16), nullable=True)
         )
@@ -49,4 +49,13 @@ traffic_data = db.Table(
                 db.Column('duration_sec', db.Integer, nullable=False),
                 db.Column('duration_traffic_sec', db.Integer, nullable=False),
                 db.Column('traffic_ratio', db.REAL, nullable=False)
+        )
+
+sms_data = db.Table(
+        'sms_data',
+        metadata_obj,
+        db.Column('sms_id', db.Integer, primary_key=True),
+        db.Column('date', db.String(10), nullable=False),
+        db.Column('sms_type', db.String(20), nullable=False),
+        db.Column('err_count', db.Integer, nullable=False)
         )

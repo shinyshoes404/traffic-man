@@ -1,4 +1,12 @@
-import os, base64, requests
+import os, base64, requests, logging
+from traffic_man.config import Config
+from time import sleep
+
+# Logging setup
+logger = logging.getLogger(__name__)
+logger.setLevel(Config.log_level)
+logger.addHandler(Config.file_handler)
+logger.addHandler(Config.stout_handler)
 
 class TwilioSender:
     def __init__(self):
@@ -11,30 +19,71 @@ class TwilioSender:
 
         self.headers = {"Authorization": "Basic " + base64_auth, "Content-Type": "application/x-www-form-urlencoded"}
         self.from_phone = os.environ.get("FROM_NUM")
+
     
     def send_bad_traffic_sms(self, phone_nums: list):
+        logger.info("attempting to send bad traffic sms")
+        body = "Traffic is looking pretty bad."
+        err_count = 0
         for num in phone_nums:
-            req_body = {
-                "Body": "Traffic is looking pretty bad",
-                "To": num,
-                "From": self.from_phone
-            }
+           
+            if not self.send_sms_with_retry(2, body, num):
+                logger.error("failed to send bad traffic sms to {0}".format(num))
+                err_count = err_count + 1
 
-
-            resp = requests.post(url=self.url, headers=self.headers, data=req_body)
-            print(req_body)
-            print(resp.status_code)
-            print(resp.content)
+        return err_count
     
-    def send_resolved_traffic_sms(self, phone_nums: list):
+    def send_resolved_traffic_sms(self, phone_nums: list) -> int:
+        logger.info("attempting to send traffic resolved sms")
+        body = "It looks like traffic has cleared up."
+        err_count = 0
         for num in phone_nums:
-            req_body = {
-                "Body": "It looks like traffic has cleared up.",
-                "To": num,
-                "From": self.from_phone
-            }
+           
+            if not self.send_sms_with_retry(2, body, num):
+                logger.error("failed to send traffic resolved sms to {0}".format(num))
+                err_count = err_count + 1
+
+        return err_count
+
+
+    def send_sms(self, body: str, phone_num: str) -> bool:
+        logger.info("attempting to send sms")
+        
+        req_body = {
+            "Body": body,
+            "To": phone_num,
+            "From": self.from_phone
+        }
+
+        try:
             resp = requests.post(url=self.url, headers=self.headers, data=req_body)
-            print(req_body)
-            print(resp.status_code)
+        except requests.exceptions.Timeout:
+            logger.error("twilio request timed out")
+            return None
+        except requests.exceptions.SSLError:
+            logger.error("twilio request experienced an SSL error")
+            return None
+        except Exception as e:
+            logger.error("twilio request encountered an unexcpected error")
+            logger.error(e)
+            return None
 
+        if resp.status_code != 201:
+            logger.error("twilio request to send sms failed status code: {0} content: {1}".format(resp.status_code, resp.content))
+            return None
 
+        logger.info("sms message successfully sent to {0}".format(phone_num))
+        return True
+
+    def send_sms_with_retry(self, attempts: int, body: str, phone_num: str) -> bool:
+        # attempts = total attempts, not just retries
+        for i in range(0,attempts):
+            sms_result = self.send_sms(body, phone_num)
+            if sms_result:
+                return sms_result
+            if i < max(range(0, attempts)):
+                logger.warning("wait before we retry retry")
+                sleep(10 * (i + 1))
+                logger.warning("retrying google maps api call")
+
+        return None
