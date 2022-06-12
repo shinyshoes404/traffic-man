@@ -11,3 +11,5 @@ build/
 *.log
 .VSCodeCounter/
 *.db
+test.py
+sqlite3.exe
