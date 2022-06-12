@@ -1,4 +1,3 @@
-from configparser import ConfigParser
 import os, platform, logging, sys
 from logging.handlers import RotatingFileHandler
 

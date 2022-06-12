@@ -15,7 +15,7 @@ setup(
     license='MIT License',
     packages=['traffic_man'],
     package_dir={'':'src'},
-    #entry_points = { 'console_scripts' : ['example-command=package.module.function']},
+    entry_points = { 'console_scripts' : ['start-traffic-man=traffic_man.entrypoint:main']},
     
     install_requires=[
         'requests', 'sqlalchemy'
