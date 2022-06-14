@@ -75,18 +75,9 @@ RUN cd ${PY_APP_DIR} && \
     pip install . && \
     rm -R ./*
 
-# copy in our entrypoint file (everything else should be installed)
-COPY src/main.py ${PY_APP_DIR}/
-
-
-
 #### --- WHAT TO DO WHEN THE CONTAINER STARTS --- ####
 
-#  change ownership recursively of python application directory so that USERNAME has privileges on files copied into image
 #  make sure the default user owns the etc files
-#  move into the application directory
 #  start the application
-ENTRYPOINT chown -R ${USERNAME}:${USERNAME} ${PY_ROOT_DIR} && \
-    chown -R ${USERNAME}:${USERNAME} ${ETC_DIR} && \
-    su ${USERNAME} -c "cd ${PY_APP_DIR} && \
-    python3 main.py"
+ENTRYPOINT chown -R ${USERNAME}:${USERNAME} ${ETC_DIR} && \
+    su ${USERNAME} -c "start-traffic-man"
