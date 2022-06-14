@@ -21,7 +21,7 @@ class MapGoogler:
         "departure_time": "now",
         "key": os.environ.get("GOOGLE_API_KEY")
     }
-
+    model = Config.traffic_model
     params_urlencode = urllib.parse.urlencode(params, safe=":/")
     
     @staticmethod
@@ -32,10 +32,10 @@ class MapGoogler:
             resp = requests.get(url=MapGoogler.base_url + MapGoogler.params_urlencode)
             resp_data = resp.json()
         except requests.exceptions.Timeout:
-            logger.warn("google maps api request timed out")
+            logger.warning("google maps api request timed out")
             return None
         except requests.exceptions.SSLError:
-            logger.warn("google maps api request experienced SSL error")
+            logger.warning("google maps api request experienced SSL error")
             return None
         except Exception as e:
             logger.error("google maps api request experienced an unexpected exception")

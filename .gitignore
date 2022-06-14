@@ -6,6 +6,7 @@ venv*/
 .vscode/
 testing.py
 .coverage
+htmlcov/
 dist/
 build/
 *.log
