@@ -58,10 +58,10 @@ class TwilioSender:
         try:
             resp = requests.post(url=self.url, headers=self.headers, data=req_body)
         except requests.exceptions.Timeout:
-            logger.error("twilio request timed out")
+            logger.warning("twilio request timed out")
             return None
         except requests.exceptions.SSLError:
-            logger.error("twilio request experienced an SSL error")
+            logger.warning("twilio request experienced an SSL error")
             return None
         except Exception as e:
             logger.error("twilio request encountered an unexcpected error")
@@ -77,13 +77,13 @@ class TwilioSender:
 
     def send_sms_with_retry(self, attempts: int, body: str, phone_num: str) -> bool:
         # attempts = total attempts, not just retries
-        for i in range(0,attempts):
+        for i in range(0, attempts):
             sms_result = self.send_sms(body, phone_num)
             if sms_result:
                 return sms_result
             if i < max(range(0, attempts)):
                 logger.warning("wait before we retry retry")
                 sleep(10 * (i + 1))
-                logger.warning("retrying google maps api call")
-
+                logger.warning("retrying twilio api call")
+        logger.error("sms send exceeded the max number of attempts - max atempts: {0}".format(attempts))
         return None
