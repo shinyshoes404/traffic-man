@@ -35,6 +35,7 @@ stages:
 .script-linux: &script-linux
   - echo "this is testing"
   - echo "python version" && python --version
+  - mkdir -p /etc/traffic-man
   - python -m pip install --upgrade pip
   - pip install -e .[dev]
   - coverage run --source=src -m unittest discover -v -s tests/unit
@@ -46,6 +47,7 @@ stages:
 .script-win: &script-win
   - echo "this is testing"
   - echo "python version"; python --version
+  - mkdir $env:userprofile\.traffic-man
   - python -m pip install --upgrade pip
   - pip install -e .[dev]
   - coverage run --source=src -m unittest discover -v -s tests/unit
