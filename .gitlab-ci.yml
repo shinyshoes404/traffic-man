@@ -1,0 +1,135 @@
+### ------------------------------------- STAGES --------------------------------------------- ###
+# stages will run in the order listed. stages will only run if the
+# jobs defined for them qualify based on the event (merge, commit, parse commit message)
+
+stages:
+  - test
+   
+
+### ------------------------------------ END OF STAGES ---------------------------------------- ###
+
+
+### -------------------------- LIST OF FILES WE CARE ABOUT CHANGES ON ------------------------- ###
+
+# define changes anchor
+.changes: &changes
+  - setup.py
+  - src/**/*
+  - .gitlab-ci.yml
+  - pyproject.toml
+  - Dockerfile
+  - tests/**/*
+
+### ----------------------- END OF LIST OF FILES WE CARE ABOUT CHANGES ON --------------------- ###
+
+
+### ----------------------------------------- TEST JOBS ----------------------------------------- ###
+
+# ------------------ test scripts ----------------- #
+
+
+# using a yaml anchor to reuse test scripts
+# the "." means gitlab will ignore it as a job
+
+# create reusable script for linux tests
+.script-linux: &script-linux
+  - echo "this is testing"
+  - echo "python version" && python --version
+  - python -m pip install --upgrade pip
+  - pip install -e .[dev]
+  - coverage run --source=src -m unittest discover -v -s tests/unit
+  - coverage xml
+  - coverage report -m | grep TOTAL
+
+
+# create reusable script for windows tests
+.script-win: &script-win
+  - echo "this is testing"
+  - echo "python version"; python --version
+  - python -m pip install --upgrade pip
+  - pip install -e .[dev]
+  - coverage run --source=src -m unittest discover -v -s tests/unit
+  - coverage xml
+  - coverage report -m | Select-String "TOTAL"
+
+
+# -------------- end test scripts ------------------ #
+
+# test job for python 3.9 running on linux
+test-linux-py39:                                                      # name of the job
+  stage: test                                                         # the stage the job belongs to
+  image: python:3.9.8-slim-bullseye                                   # use this docker image to run the job
+  tags:
+    - shared-linux                                                    # use runner with this tag
+  rules:
+    - if: $CI_COMMIT_TAG                                              # If a tag is set, it's because the release was just created, we don't need to run this job again
+      when: never
+      
+    - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
+      changes: *changes                                               # Execute this job only if the files we care about have changed
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+                                                                      # yield the same result, because this job is part of the first stage.
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
+                                                                      # Added this if to make sure that these jobs run when a pipeline is manually run from the UI
+
+    - when: never                                                     # If not criteria were matched, do not run this job
+  
+  script: *script-linux                                               # run the scripted defined as an anchor above
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+
+
+# test job for python 3.10 running on linux
+test-linux-py310:                                                     # name of the job
+  stage: test                                                         # the stage the job belongs to
+  image: python:3.10.1-slim-bullseye                                  # use this docker image to run the job
+  tags:
+    - shared-linux                                                    # use runner with this tag
+  rules:
+    - if: $CI_COMMIT_TAG                                              # If a tag is set, it's because the release was just created, we don't need to run this job again
+      when: never
+      
+    - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
+      changes: *changes                                               # Execute this job only if the files we care about have changed
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+                                                                      # yield the same result, because this job is part of the first stage.
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
+                                                                      # Added this if to make sure that these jobs run when a pipeline is manually run from the UI
+
+    - when: never                                                     # If not criteria were matched, do not run this job
+  
+  script: *script-linux                                               # run the scripted defined as an anchor above
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+
+
+# test job for python 3.10 windows
+test-win-py310:                                                       # name of the job
+  stage: test                                                         # the stage the job belongs to
+  image: python:3.10-windowsservercore-1809                           # the docker image to use for running the job
+  tags:
+    - shared-win                                                      # use runner with this tag
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev and if the files we care about have changes
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+                                                                      # yield the same result, because this job is part of the first stage.
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
+
+    - when: never                                                     # If no criteria were matched, do not run this job
+  
+  script: *script-win                                                 # predefined test script to run
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+
+
+# --------------------- jobs ----------------------- #

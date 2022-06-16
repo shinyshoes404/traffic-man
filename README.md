@@ -7,4 +7,4 @@ An application that checks for bad traffic between two points using the Google M
 ## Development and testing
 
 ### Testing
- - Run the suite of unit tests and record test coverage for reporting with `coverage run --source=src -m unittest discover -v -s tests/unit_tests`
+ - Run the suite of unit tests and record test coverage for reporting with `coverage run --source=src -m unittest discover -v -s tests/unit`
