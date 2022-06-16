@@ -11,25 +11,26 @@ logger.addHandler(Config.file_handler)
 logger.addHandler(Config.stout_handler)
 
 class MapGoogler:
-    base_url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
-    params = {
-        "origins": "place_id:" + os.environ.get("ORIGIN_PLACE_ID"),
-        "destinations": "place_id:" + os.environ.get("DEST_PLACE_ID"),
-        "traffic_model": Config.traffic_model,
-        "mode": Config.mode,
-        "language": Config.language,
-        "departure_time": "now",
-        "key": os.environ.get("GOOGLE_API_KEY")
-    }
-    model = Config.traffic_model
-    params_urlencode = urllib.parse.urlencode(params, safe=":/")
+
+    def __init__(self):
+        self.base_url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
+        self.params = {
+            "origins": "place_id:" + os.environ.get("ORIGIN_PLACE_ID"),
+            "destinations": "place_id:" + os.environ.get("DEST_PLACE_ID"),
+            "traffic_model": Config.traffic_model,
+            "mode": Config.mode,
+            "language": Config.language,
+            "departure_time": "now",
+            "key": os.environ.get("GOOGLE_API_KEY")
+        }
+
+        self.params_urlencode = urllib.parse.urlencode(self.params, safe=":/")
     
-    @staticmethod
-    def call_google_maps():
+    def call_google_maps(self):
         logger.info("attempting to call google maps api")
 
         try:
-            resp = requests.get(url=MapGoogler.base_url + MapGoogler.params_urlencode)
+            resp = requests.get(url=self.base_url + self.params_urlencode)
             resp_data = resp.json()
         except requests.exceptions.Timeout:
             logger.warning("google maps api request timed out")
@@ -49,11 +50,10 @@ class MapGoogler:
         logger.info("google maps data retreived")
         return resp_data
     
-    @staticmethod
-    def google_call_with_retry(attempts: int) -> dict:
+    def google_call_with_retry(self, attempts: int) -> dict:
         # attempts = total attempts, not just retries
         for i in range(0,attempts):
-            raw_maps_data = MapGoogler.call_google_maps()
+            raw_maps_data = self.call_google_maps()
             if raw_maps_data:
                 return raw_maps_data
             if i < max(range(0, attempts)):
