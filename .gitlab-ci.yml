@@ -78,8 +78,11 @@ test-linux-py39:                                                      # name of 
   
   script: *script-linux                                               # run the scripted defined as an anchor above
   artifacts:
+    expire_in: 2 days
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 
 # test job for python 3.10 running on linux
@@ -105,8 +108,11 @@ test-linux-py310:                                                     # name of 
   
   script: *script-linux                                               # run the scripted defined as an anchor above
   artifacts:
+    expire_in: 2 days
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 
 # test job for python 3.10 windows
@@ -128,8 +134,11 @@ test-win-py310:                                                       # name of 
   
   script: *script-win                                                 # predefined test script to run
   artifacts:
+    expire_in: 2 days
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 
 # --------------------- jobs ----------------------- #
