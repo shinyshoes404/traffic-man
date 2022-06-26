@@ -1,4 +1,3 @@
-from traffic_man import engine
 from traffic_man.db_ops import DataSetup, TrafficDateTime, TrafficData, SMSData
 from traffic_man.google import MapGoogler
 from traffic_man.config import Config
@@ -6,6 +5,12 @@ from traffic_man.twilio import TwilioSender
 from time import sleep
 import logging
 
+import sqlalchemy as db
+from traffic_man.config import Config
+from traffic_man.models import metadata_obj
+
+engine = db.create_engine('sqlite:///' + Config.db_path)
+metadata_obj.create_all(engine)
 
 # Logging setup
 logger = logging.getLogger(__name__)
@@ -36,7 +41,8 @@ def main():
         logger.info("seconds to sleep until next run: {0}".format(sleep_seconds))
         sleep(sleep_seconds)
 
-        raw_maps_data = MapGoogler.google_call_with_retry(3)
+        map_googler = MapGoogler()
+        raw_maps_data = map_googler.google_call_with_retry(3)
        
         # only move forward if we were able to get google maps data
         if raw_maps_data:
