@@ -262,6 +262,7 @@ class TrafficData:
         except Exception as e:
             logger.error("problem checking traffic conditions in the db")
             logger.error(e)
+            return False
 
         if len(row) == 0:
             logger.info("no traffic conditions listed for today")
