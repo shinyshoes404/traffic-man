@@ -8,13 +8,11 @@ __Highlights__
  - Docker and docker compose for build and deployment
  - Base image python:3.10.1-slim-bullseye
  - Uses the Google Maps Distance Matrix API (paid service) to retrieve traffic conditions
- - Twilio's Messaging API provides the SMS messaging functionality
+ - Twilio's Messaging API provides the SMS messaging functionality (also, a paid service)
 
 ## Prerequisites
- - Google account with Google Maps API enabled
-    - Need specific API
-    - Paid API
- - Twilio account with SMS enabled
+ - Google account with Google Maps' Distance Matrix API enabled
+ - Twilio account with SMS setup
  - A linux host machine with docker and docker compose installed to build and run the application image
 
 
@@ -24,7 +22,9 @@ __Highlights__
      - Replace all of the example values with your own.
  - Update /src/traffic_man/config.py
      - Adjust the `overage_parameter` value to whatever you want. The default is set to 0.5, which means that a bad traffic SMS will be sent when the travel time with traffic is 50% more than the standard travel time. This value should be greater than 0, and should be expressed as a decimal number.
-         - Once the bad traffic threshold is passed, traffic man will look for travel time to drop below 50% of the bad traffic threshold. If traffic man identifies that travel time has dropped below that threshold, it will send another SMS indicating that traffic conditions are improving.  
+         - Once the bad traffic threshold is passed, traffic man will look for travel time to drop below 50% of the bad traffic threshold. If traffic man identifies that travel time has dropped below that threshold, it will send another SMS indicating that traffic conditions are improving.  __Example:__ If your overage parameter is set at 0.5, once the travel time with traffic exceeds 1.5 times the normal travel time, a bad traffic SMS message will send. Once the travel time with traffic drops below 1.25 times the normal travel time, a traffic resolved SMS message will be sent.  
+           
+           
          __Note:__ Traffic man will only send one bad traffic SMS and one traffic resolved SMS per day. If traffic conditions oscillate back and forth several times around the overage parameter, traffic man will not continue to send SMS messages beyond one of each type.
      - Set the `traffic_check_times` variable. This indicates what time each day you want traffic man to check traffic conditions. The default setup will check every 15 minutes starting at 4:00 PM (16:00), with the last check at 7:00 PM (19:00).
     - Update the `holidays` variable to include any holidays you want, so traffic man won't check traffic conditions on those days.
