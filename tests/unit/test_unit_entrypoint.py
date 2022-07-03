@@ -52,11 +52,28 @@ class Testentrypoint_datasetup(unittest.TestCase):
 class Testentrypoint_whileloop(unittest.TestCase):
 
     ### ------------------------- entrypoint.main() -----------------------------   
+    def test_main_while_loop_flag_1201_set(self, mock_meta_obj, mock_db, mock_datasetup, mock_sleep, mock_trafficdatetime, mock_run, mock_mapgoogler):
+        mock_datasetup.return_value.update_check_times.return_value = True
+        mock_datasetup.return_value.update_holidays.return_value = True
+        mock_datasetup.return_value.update_check_days.return_value = True
+        mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, True)
+
+        mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
+
+        mock_mapgoogler.return_value.google_call_with_retry.return_value = None
+        main()
+        self.assertEqual(mock_mapgoogler.return_value.google_call_with_retry.call_count, 0)
+
+
     def test_main_while_loop_no_google_data(self, mock_meta_obj, mock_db, mock_datasetup, mock_sleep, mock_trafficdatetime, mock_run, mock_mapgoogler):
         mock_datasetup.return_value.update_check_times.return_value = True
         mock_datasetup.return_value.update_holidays.return_value = True
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
 
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
@@ -71,6 +88,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_holidays.return_value = True
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
 
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
@@ -87,6 +106,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_holidays.return_value = True
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
 
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
@@ -108,6 +129,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_holidays.return_value = True
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
 
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
@@ -133,6 +156,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
 
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
+
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
         mock_mapgoogler.return_value.google_call_with_retry.return_value = {"fake google data": "fake data"}
@@ -155,6 +180,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
 
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
+
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
         mock_mapgoogler.return_value.google_call_with_retry.return_value = {"fake google data": "fake data"}
@@ -175,6 +202,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_holidays.return_value = True
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
 
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
@@ -199,6 +228,8 @@ class Testentrypoint_whileloop(unittest.TestCase):
         mock_datasetup.return_value.update_holidays.return_value = True
         mock_datasetup.return_value.update_check_days.return_value = True
         mock_datasetup.return_value.update_phone_numbers.return_value = True
+
+        mock_trafficdatetime.return_value.get_next_run_sleep_seconds.return_value = (10, False)
 
         mock_run.side_effect = [True, False] # make sure we only cycle through the while loop routine once
 
