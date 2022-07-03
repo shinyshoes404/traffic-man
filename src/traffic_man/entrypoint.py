@@ -18,6 +18,10 @@ logger.setLevel(Config.log_level)
 logger.addHandler(Config.file_handler)
 logger.addHandler(Config.stout_handler)
 
+# need for unit testing
+def keep_running():
+    return True
+
 def main():
     # db setup - If any of these steps are not successful return, do not move forward
     logger.info("setting up the database")
@@ -34,7 +38,8 @@ def main():
 
     logger.info("database setup complete")
 
-    while True:
+    # implementing keep_running, just for unit testing
+    while keep_running():
         traffic_date = TrafficDateTime(engine)
 
         sleep_seconds = traffic_date.get_next_run_sleep_seconds()
@@ -51,8 +56,6 @@ def main():
             # only move forward if the raw data was successfully transformed
             if maps_data_tranformed:
                 traffic_data = TrafficData(engine)
-
-
                 traffic_data.store_traffic_data(maps_data_tranformed)
 
                 if maps_data_tranformed["traffic_ratio"] >= Config.overage_parameter:        
@@ -76,4 +79,3 @@ def main():
                             twilio_sender = TwilioSender()
                             err_count = twilio_sender.send_resolved_traffic_sms(traffic_data.get_phone_numbers())
                             sms_data.write_sms_record("traffic resolved", err_count)
-
