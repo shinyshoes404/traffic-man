@@ -414,7 +414,7 @@ class TestTrafficDateTime(unittest.TestCase):
 
                         test_obj = TrafficDateTime()
                         check_val = test_obj.get_next_run_sleep_seconds()
-                        self.assertEqual(check_val, 120)
+                        self.assertEqual(check_val, (120, True))
 
     def test_get_next_run_sleep_seconds_is_holiday(self):
         with mock.patch("traffic_man.db_ops.TrafficDateTime.__init__", return_value=None) as mock_init:
@@ -426,7 +426,7 @@ class TestTrafficDateTime(unittest.TestCase):
 
                             test_obj = TrafficDateTime()
                             check_val = test_obj.get_next_run_sleep_seconds()
-                            self.assertEqual(check_val, 120)
+                            self.assertEqual(check_val, (120, True))
 
     def test_get_next_run_sleep_seconds_next_time_tomorrow(self):
         with mock.patch("traffic_man.db_ops.TrafficDateTime.__init__", return_value=None) as mock_init:
@@ -439,7 +439,7 @@ class TestTrafficDateTime(unittest.TestCase):
 
                                 test_obj = TrafficDateTime()
                                 check_val = test_obj.get_next_run_sleep_seconds()
-                                self.assertEqual(check_val, 120)
+                                self.assertEqual(check_val, (120, True))
 
     def test_get_next_run_sleep_seconds_get_seconds(self):
         with mock.patch("traffic_man.db_ops.TrafficDateTime.__init__", return_value=None) as mock_init:
@@ -452,7 +452,7 @@ class TestTrafficDateTime(unittest.TestCase):
 
                                 test_obj = TrafficDateTime()
                                 check_val = test_obj.get_next_run_sleep_seconds()
-                                self.assertEqual(check_val, 90)
+                                self.assertEqual(check_val, (90, False))
 
 
 class TestTrafficData(unittest.TestCase):

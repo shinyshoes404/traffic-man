@@ -42,40 +42,43 @@ def main():
     while keep_running():
         traffic_date = TrafficDateTime(engine)
 
-        sleep_seconds = traffic_date.get_next_run_sleep_seconds()
+        sleep_seconds, flag_1201 = traffic_date.get_next_run_sleep_seconds()
         logger.info("seconds to sleep until next run: {0}".format(sleep_seconds))
         sleep(sleep_seconds)
 
-        map_googler = MapGoogler()
-        raw_maps_data = map_googler.google_call_with_retry(3)
-       
-        # only move forward if we were able to get google maps data
-        if raw_maps_data:
-        
-            maps_data_tranformed = MapGoogler.calc_traffic(raw_maps_data)
-            # only move forward if the raw data was successfully transformed
-            if maps_data_tranformed:
-                traffic_data = TrafficData(engine)
-                traffic_data.store_traffic_data(maps_data_tranformed)
+        # only run through the rest of the routine (including API calls that cost money) if we weren't just sleeping until 12:01 AM the following day
+        if not flag_1201:
 
-                if maps_data_tranformed["traffic_ratio"] >= Config.overage_parameter:        
-                    traffic_condition = traffic_data.check_traffic_conditions()
-                    if traffic_condition == None:
-                        traffic_data.write_bad_traffic()                        
-                        # don't send more than one bad traffic sms per day
-                        sms_data = SMSData(engine)                        
-                        if sms_data.check_sms_today("bad traffic") == False:  
-                            twilio_sender = TwilioSender()                   
-                            err_count = twilio_sender.send_bad_traffic_sms(traffic_data.get_phone_numbers())
-                            sms_data.write_sms_record("bad traffic", err_count)
-                
-                elif maps_data_tranformed["traffic_ratio"] < (Config.overage_parameter * 0.5):
-                    traffic_condition = traffic_data.check_traffic_conditions()
-                    if traffic_condition == "traffic":
-                        traffic_data.write_traffic_resolved()
-                        # don't send more than one traffic resolved sms per day
-                        sms_data = SMSData(engine)
-                        if sms_data.check_sms_today("traffic resolved") == False:
-                            twilio_sender = TwilioSender()
-                            err_count = twilio_sender.send_resolved_traffic_sms(traffic_data.get_phone_numbers())
-                            sms_data.write_sms_record("traffic resolved", err_count)
+            map_googler = MapGoogler()
+            raw_maps_data = map_googler.google_call_with_retry(3)
+        
+            # only move forward if we were able to get google maps data
+            if raw_maps_data:
+            
+                maps_data_tranformed = MapGoogler.calc_traffic(raw_maps_data)
+                # only move forward if the raw data was successfully transformed
+                if maps_data_tranformed:
+                    traffic_data = TrafficData(engine)
+                    traffic_data.store_traffic_data(maps_data_tranformed)
+
+                    if maps_data_tranformed["traffic_ratio"] >= Config.overage_parameter:        
+                        traffic_condition = traffic_data.check_traffic_conditions()
+                        if traffic_condition == None:
+                            traffic_data.write_bad_traffic()                        
+                            # don't send more than one bad traffic sms per day
+                            sms_data = SMSData(engine)                        
+                            if sms_data.check_sms_today("bad traffic") == False:  
+                                twilio_sender = TwilioSender()                   
+                                err_count = twilio_sender.send_bad_traffic_sms(traffic_data.get_phone_numbers())
+                                sms_data.write_sms_record("bad traffic", err_count)
+                    
+                    elif maps_data_tranformed["traffic_ratio"] < (Config.overage_parameter * 0.5):
+                        traffic_condition = traffic_data.check_traffic_conditions()
+                        if traffic_condition == "traffic":
+                            traffic_data.write_traffic_resolved()
+                            # don't send more than one traffic resolved sms per day
+                            sms_data = SMSData(engine)
+                            if sms_data.check_sms_today("traffic resolved") == False:
+                                twilio_sender = TwilioSender()
+                                err_count = twilio_sender.send_resolved_traffic_sms(traffic_data.get_phone_numbers())
+                                sms_data.write_sms_record("traffic resolved", err_count)

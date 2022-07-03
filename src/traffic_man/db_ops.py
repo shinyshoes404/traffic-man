@@ -195,7 +195,7 @@ class TrafficDateTime:
         logger.info("next time to check is {0}".format(data[0][0]))
         return data[0][0]
 
-    def get_next_run_sleep_seconds(self) -> int:
+    def get_next_run_sleep_seconds(self) -> tuple[int, bool]:
         self.curr_datetime = datetime.now()
         self.curr_hr_min = self.curr_datetime.strftime("%H:%M")
         self.curr_date = self.curr_datetime.strftime("%Y-%m-%d")
@@ -206,23 +206,23 @@ class TrafficDateTime:
         # if it not a weekday that we check traffic, just return seconds until tomorrow
         if self._check_weekday() == False:
             seconds_to_sleep = int((self._get_1201_tomorrow() - datetime.now()).total_seconds())
-            return seconds_to_sleep
+            return seconds_to_sleep, True
         
         # if it is a holiday, just return the seconds until tomorrow
         if self._check_holiday() == True:
             seconds_to_sleep = int((self._get_1201_tomorrow() - datetime.now()).total_seconds())
-            return seconds_to_sleep
+            return seconds_to_sleep, True
         
         next_time = self._check_next_time()
 
         if next_time == "tomorrow":
             seconds_to_sleep = int((self._get_1201_tomorrow() - datetime.now()).total_seconds())
-            return seconds_to_sleep
+            return seconds_to_sleep, True
         
         # if no other matches get the number of seconds until the next run
         seconds_to_sleep = self._get_seconds_to_time(next_time)
 
-        return seconds_to_sleep
+        return seconds_to_sleep, False
 
 
 class TrafficData:
