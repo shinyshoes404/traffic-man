@@ -77,6 +77,8 @@ class MapGoogler:
         except Exception as e:
             logger.error("problem calculating traffic")
             logger.error(e)
+            logger.error("google_maps_json: \n\t\t{0}".format(google_maps_json))
+            logger.error("restructured_data: \n\t\t{0}".format(restructured_data))
             return None
         
         return restructured_data
