@@ -117,30 +117,30 @@ test-linux-py310:                                                     # name of 
         path: coverage.xml
 
 
-# # test job for python 3.10 windows
-# test-win-py310:                                                       # name of the job
-#   stage: test                                                         # the stage the job belongs to
-#   image: python:3.10-windowsservercore-1809                           # the docker image to use for running the job
-#   tags:
-#     - shared-win                                                      # use runner with this tag
-#   rules:
-#     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev and if the files we care about have changes
-#       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-#       when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
-#                                                                       # yield the same result, because this job is part of the first stage.
-#     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
-#       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-#       when: on_success                                                # Execute job if jobs from previous stage are successful.
+# test job for python 3.10 windows
+test-win-py310:                                                       # name of the job
+  stage: test                                                         # the stage the job belongs to
+  image: python:3.10-windowsservercore-1809                           # the docker image to use for running the job
+  tags:
+    - shared-win                                                      # use runner with this tag
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev and if the files we care about have changes
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+                                                                      # yield the same result, because this job is part of the first stage.
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
 
-#     - when: never                                                     # If no criteria were matched, do not run this job
+    - when: never                                                     # If no criteria were matched, do not run this job
   
-#   script: *script-win                                                 # predefined test script to run
-#   artifacts:
-#     expire_in: 2 days
-#     reports:
-#       coverage_report:
-#         coverage_format: cobertura
-#         path: coverage.xml
+  script: *script-win                                                 # predefined test script to run
+  artifacts:
+    expire_in: 2 days
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 
 # --------------------- jobs ----------------------- #
