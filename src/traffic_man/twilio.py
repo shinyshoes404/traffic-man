@@ -82,7 +82,7 @@ class TwilioSender:
             if sms_result:
                 return sms_result
             if i < max(range(0, attempts)):
-                logger.warning("wait before we retry retry")
+                logger.warning("wait before we retrys")
                 sleep(10 * (i + 1))
                 logger.warning("retrying twilio api call")
         logger.error("sms send exceeded the max number of attempts - max atempts: {0}".format(attempts))
