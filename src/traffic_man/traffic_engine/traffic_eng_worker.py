@@ -1,4 +1,4 @@
-from traffic_man.google import MapGoogler
+from traffic_man.google.google import MapGoogler
 from traffic_man.config import Config
 from traffic_man.twilio import TwilioSender
 from time import sleep
