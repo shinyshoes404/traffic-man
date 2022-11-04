@@ -1,6 +1,6 @@
 import mock, unittest, os, requests
 import urllib.parse
-from traffic_man.google import MapGoogler
+from traffic_man.google.map_googler import MapGoogler
 
 
 

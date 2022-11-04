@@ -124,5 +124,3 @@ class OrigDestOptimizer:
             return False
 
 
-
-
