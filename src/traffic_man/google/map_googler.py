@@ -5,6 +5,7 @@ from time import sleep
 
 
 # Logging setup
+import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(Config.log_level)
 logger.addHandler(Config.file_handler)
@@ -154,6 +155,8 @@ class MapGoogler:
             i += 1
         
         return traffic_data
+
+
 
 
 
