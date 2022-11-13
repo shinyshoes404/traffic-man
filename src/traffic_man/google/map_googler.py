@@ -28,7 +28,7 @@ class MapGoogler:
 
         self.params_urlencode = urllib.parse.urlencode(self.params, safe=":/")
     
-    def call_google_maps(self):
+    def _call_google_maps(self):
         logger.info("attempting to call google maps api")
 
         try:
@@ -55,7 +55,7 @@ class MapGoogler:
     def google_call_with_retry(self, attempts: int) -> dict:
         # attempts = total attempts, not just retries
         for i in range(0,attempts):
-            raw_maps_data = self.call_google_maps()
+            raw_maps_data = self._call_google_maps()
             if raw_maps_data:
                 return raw_maps_data
             if i < max(range(0, attempts)):
@@ -154,11 +154,4 @@ class MapGoogler:
 
             i += 1
         
-        return traffic_data
-
-
-
-
-
-
-        
+        return traffic_data        

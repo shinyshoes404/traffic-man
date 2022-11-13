@@ -20,7 +20,7 @@ class TrafficData:
 
         qry = traffic_data.insert().values(
             datetime=traffic_json["datetime"],
-            origin_place_id=traffic_json["origin_place_id"],
+            origin_place_id=traffic_json["orig_place_id"],
             origin_addr=traffic_json["origin_addr"],
             dest_place_id=traffic_json["dest_place_id"],
             destination_addr=traffic_json["destination_addr"],
@@ -34,6 +34,7 @@ class TrafficData:
                 connection.execute(qry)
         except Exception as e:
             logger.error("problem storing traffic data")
+            logger.error("\tdata: {0}".format(traffic_json))
             logger.error(e)
             return None
 
@@ -54,7 +55,7 @@ class TrafficData:
 
         if len(rows) == 0:
             logger.info("no traffic conditions listed for today")
-            return None
+            return {}
         
         traffic_results = {}
         for row in rows:
@@ -63,7 +64,7 @@ class TrafficData:
             else:
                 traffic_cond = "traffic"
 
-            # create at an object to the traffic results dict with the format {"orig_place_id|dest_place_id" : "traffic_cond"}
+            # create an object  the traffic results dict with the format {"orig_place_id|dest_place_id" : "traffic_cond"}
             traffic_results[row[2] + "|" + row[3]] = traffic_cond
 
         return traffic_results
@@ -76,14 +77,14 @@ class TrafficData:
             qry = traffic_conditions.insert().values(
                 date=self.curr_date, 
                 bad_traffic_datetime=curr_datetime,
-                orig_place_id=orig_place_id,
+                origin_place_id=orig_place_id,
                 dest_place_id=dest_place_id
                 )
 
             with self.engine.connect() as connection:
                 connection.execute(qry)
         except Exception as e:
-            logger.error("problem writing back trafic record for orig id: {1}, dest_id: {2}".format(orig_place_id, dest_place_id))
+            logger.error("problem writing back trafic record for orig id: {0}, dest_id: {1}".format(orig_place_id, dest_place_id))
             logger.error(e)
             return None
 

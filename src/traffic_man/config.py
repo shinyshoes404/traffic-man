@@ -46,12 +46,16 @@ class Config:
     ### --- TRAFFIC_MAN_PARAMS --- ###
 
     # traffic overage parameter
-    overage_parameter = 0.5
+    overage_parameter = 0.1
 
     # times to check traffic condition
     traffic_check_times = [
-                            "16:00", 
-                            "16:15",
+                            
+                            "12:51", 
+                            "12:52",
+                            "12:53",
+                            "12:04",
+                            "16:25",
                             "16:30",
                             "16:45",
                             "17:00",
@@ -75,4 +79,4 @@ class Config:
                 ]
 
     # days of the week to check traffic
-    traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]

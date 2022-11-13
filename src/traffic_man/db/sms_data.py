@@ -15,7 +15,8 @@ class SMSData:
         self.engine = engine
         self.curr_date = datetime.now().strftime("%Y-%m-%d")
     
-    def check_sms_today(self, type: str) -> bool:
+    def check_sms_today(self, type: str, orig_dest_list: list) -> bool:
+        # expecting a list of objects ex: [{"origin_place_id": "abice22444", "dest_place_id": "zdgiwh2335", ...}]
         try:
             qry = sms_data.select().where(sms_data.c.date == self.curr_date, sms_data.c.sms_type == type)
             with self.engine.connect() as connection:

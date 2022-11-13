@@ -26,8 +26,8 @@ def main():
 
     try:
         while True:
-            sleep(2)
-            print("running")
+            sleep(5)
+            print("traffic man is running")
     except KeyboardInterrupt:
         kill_q.put("kill")
         kill_q.put("kill")
@@ -36,3 +36,8 @@ def main():
     
     db_worker_thread.join()
     traffic_eng_worker_thread.join()
+
+
+if __name__ == "__main__":
+    main()
+
