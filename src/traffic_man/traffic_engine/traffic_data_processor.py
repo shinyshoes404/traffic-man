@@ -76,12 +76,15 @@ class TrafficDataProc:
                         # convert the result data frame into a list of objects that is easy to insert into the db
                         new_bad_traff_res_list = new_bad_traff_res.to_dict("records")
 
+                        # get a list of origin dest pairs concatenated with a "|"
+                        new_bad_traff_origdest_list = ",".join(new_bad_traff_res["orig_dest_combined"])
+
         except Exception as e:
             logger.error("problem getting new bad traffic records")
             logger.error(e)
-            return None
+            return None, None
 
-        return new_bad_traff_res_list
+        return new_bad_traff_res_list, new_bad_traff_origdest_list
     
     def get_resolved_traffic(self) -> list:
 
@@ -106,13 +109,14 @@ class TrafficDataProc:
                         # convert the result data frame into a list of objects that is easy to insert into the db
                         new_resolved_traff_res_list = new_resolved_traff_res.to_dict("records")
 
+                        new_resolved_traff_origdest_list = ",".join(new_resolved_traff_res_list["orig_dest_combined"])
 
         except Exception as e:
             logger.error("problem getting new resolve traffic records")
             logger.error(e)
-            return None
+            return None, None
 
-        return new_resolved_traff_res_list
+        return new_resolved_traff_res_list, new_resolved_traff_origdest_list
     
 
 

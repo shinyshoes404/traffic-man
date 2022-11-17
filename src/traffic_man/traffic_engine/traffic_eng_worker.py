@@ -90,6 +90,12 @@ class TrafficEngine:
             logger.error("the msg-id does not match")
             return False
         return resp_msg.get("results")
+    
+    @staticmethod
+    def _get_bad_traffic_phone_nums(db_req_q, db_res_traffic_eng_q, orig_place_id, dest_place_id):
+        msg_id = str(uuid.uuid4())
+        ##### need to finish building this out
+
 
     @staticmethod
     def _store_resolved_traffic(db_req_q, db_res_traffic_eng_q, orig_place_id, dest_place_id):
@@ -174,13 +180,13 @@ class TrafficEngine:
                                         
                                         # only proceed if we don't have issues building out the the data frames in pandas
                                         if tdp.build_dfs():
-                                            new_bad_traffic = tdp.get_new_bad_traffic()
+                                            new_bad_traffic, new_bad_traff_origdest_list = tdp.get_new_bad_traffic()
                                             if new_bad_traffic is not None:
                                                 # insert new bad traffic records into the db
                                                 for record in new_bad_traffic:
                                                     TrafficEngine._store_new_bad_traffic(db_req_q, db_res_traffic_eng_q, record["orig_place_id"], record["dest_place_id"])
 
-                                            resolved_traffic = tdp.get_resolved_traffic()
+                                            resolved_traffic, resolved_traffic_origdest_list = tdp.get_resolved_traffic()
                                             if resolved_traffic is not None:
                                                 # insert resolved traffic records into the db
                                                 for record in resolved_traffic:

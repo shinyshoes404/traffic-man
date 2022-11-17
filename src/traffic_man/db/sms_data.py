@@ -1,6 +1,8 @@
-from traffic_man.db.models import sms_data 
+from traffic_man.db.models import sms_data, phone_numbers 
 from traffic_man.config import Config
 from datetime import datetime
+from sqlalchemy import join, select, outerjoin
+
 import logging
 
 # Logging setup
@@ -15,24 +17,44 @@ class SMSData:
         self.engine = engine
         self.curr_date = datetime.now().strftime("%Y-%m-%d")
     
-    def check_sms_today(self, type: str, orig_dest_list: list) -> bool:
-        # expecting a list of objects ex: [{"origin_place_id": "abice22444", "dest_place_id": "zdgiwh2335", ...}]
+    def get_phone_num(self, type: str, orig_place_id: str, dest_place_id: str) -> list:
+        
+
         try:
-            qry = sms_data.select().where(sms_data.c.date == self.curr_date, sms_data.c.sms_type == type)
+            phone_num_subqry = phone_numbers.select(phone_numbers.c.phone_num
+                                ).where(phone_numbers.c.origin_place_id == orig_place_id,
+                                        phone_numbers.c.dest_place_id == dest_place_id).subquery()
+            
+            sms_sent_subqry = sms_data.select(sms_data.c.phone_num
+                                        ).where(sms_data.c.datetime >= self.curr_date,
+                                                sms_data.c.sms_type == type,
+                                                sms_data.c.status == "sent",
+                                                sms_data.c.direction == "outbound").subquery()
+            
+            outer_join_subqry = outerjoin(phone_num_subqry, sms_sent_subqry, phone_num_subqry.c.phone_num == sms_sent_subqry.c.phone_num)
+
+            qry = select([phone_num_subqry.c.phone_num]).select_from(outer_join_subqry).filter(sms_sent_subqry.c.phone_num == None)
+
+
+        
             with self.engine.connect() as connection:
                 result_obj = connection.execute(qry)
                 results_data = result_obj.fetchall()
         except Exception as e:
-            logger.error("problem getting sms records")
+            logger.error("problem getting sms records for origin: {0}  dest: {1}".format(orig_place_id, dest_place_id))
             logger.error(e)
             return None
         
         if len(results_data) == 0:
-            logger.info("no {0} sms messages yet today".format(type))
-            return False
+            logger.info("{0} sms message already sent for origin: {1}  dest: {2}".format(type, orig_place_id, dest_place_id))
+            return []
         
-        logger.info("{0} {1} sms already today".format(len(results_data), type))
-        return results_data
+        logger.info("{0} phone numbers need a {1} sms sent to them".format(len(results_data), type))
+        phone_num_list = []
+        for row in results_data:
+            phone_num_list.append(row[0])
+        
+        return phone_num_list
         
 
     def write_sms_records(self, sms_data: list) -> bool:
