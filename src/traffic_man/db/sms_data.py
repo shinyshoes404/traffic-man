@@ -17,7 +17,7 @@ class SMSData:
         self.engine = engine
         self.curr_date = datetime.now().strftime("%Y-%m-%d")
     
-    def get_phone_num(self, type: str, orig_place_id: str, dest_place_id: str) -> list:
+    def get_phone_nums(self, sms_type: str, orig_place_id: str, dest_place_id: str) -> list:
         
 
         try:
@@ -27,7 +27,7 @@ class SMSData:
             
             sms_sent_subqry = sms_data.select(sms_data.c.phone_num
                                         ).where(sms_data.c.datetime >= self.curr_date,
-                                                sms_data.c.sms_type == type,
+                                                sms_data.c.sms_type == sms_type,
                                                 sms_data.c.status == "sent",
                                                 sms_data.c.direction == "outbound").subquery()
             
@@ -57,15 +57,19 @@ class SMSData:
         return phone_num_list
         
 
-    def write_sms_records(self, sms_data: list) -> bool:
+    def write_sms_records(self, sms_data: list) -> int:
         logger.info("attempting to add {0} sms records for {1}".format(len(sms_data), self.curr_date))
-        try:
-            qry = sms_data.insert().values(sms_data)
-            with self.engine.connect() as connection:
-                connection.execute(qry)
-        except Exception as e:
-            logger.error("problem inserting sms records")
-            logger.error(e)
-            return None
+        error_count = 0
+        # inserting one at a time so one bad record doesn't prevent the rest from being written to the db
+        for record in sms_data:
+            try:
+                qry = sms_data.insert().values(record)
+                with self.engine.connect() as connection:
+                    connection.execute(qry)
+            except Exception as e:
+                logger.error("problem inserting sms record \n{0}".format(record))
+                logger.error(e)
+                error_count += 1
+        logger.info("error count while writing sms records: {0}".format(error_count))
         
-        return True
+        return error_count

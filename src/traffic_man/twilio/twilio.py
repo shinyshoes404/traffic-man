@@ -1,5 +1,6 @@
 import os, base64, requests, logging
 from traffic_man.config import Config
+from datetime import datetime
 from time import sleep
 
 # Logging setup
@@ -24,26 +25,46 @@ class TwilioSender:
     def send_bad_traffic_sms(self, phone_nums: list):
         logger.info("attempting to send bad traffic sms")
         body = "Traffic is looking pretty bad."
-        err_count = 0
-        for num in phone_nums:
+        result_list = []
+        for phone_num in phone_nums:
            
-            if not self.send_sms_with_retry(2, body, num):
-                logger.error("failed to send bad traffic sms to {0}".format(num))
-                err_count = err_count + 1
+            if not self.send_sms_with_retry(2, body, phone_num):
+                logger.error("failed to send bad traffic sms to {0}".format(phone_num))
+                status = "failed"
+            else:
+                status = "sent"
+                
+            result_list.append({"datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "sms_type": "bad traffic",
+                                "status": status,
+                                "direction": "outbound",
+                                "msg_content": body,
+                                "phone_num": phone_num
+                                })
 
-        return err_count
+        return result_list
     
     def send_resolved_traffic_sms(self, phone_nums: list) -> int:
         logger.info("attempting to send traffic resolved sms")
         body = "It looks like traffic has cleared up."
-        err_count = 0
-        for num in phone_nums:
+        result_list = []
+        for phone_num in phone_nums:
            
-            if not self.send_sms_with_retry(2, body, num):
-                logger.error("failed to send traffic resolved sms to {0}".format(num))
-                err_count = err_count + 1
+            if not self.send_sms_with_retry(2, body, phone_num):
+                logger.error("failed to send traffic resolved sms to {0}".format(phone_num))
+                status = "failed"
+            else:
+                status = "sent"
 
-        return err_count
+            result_list.append({"datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "sms_type": "traffic resolved",
+                                "status": status,
+                                "direction": "outbound",
+                                "msg_content": body,
+                                "phone_num": phone_num
+                                })
+
+        return result_list
 
 
     def send_sms(self, body: str, phone_num: str) -> bool:
@@ -82,7 +103,7 @@ class TwilioSender:
             if sms_result:
                 return sms_result
             if i < max(range(0, attempts)):
-                logger.warning("wait before we retrys")
+                logger.warning("wait before we retry")
                 sleep(10 * (i + 1))
                 logger.warning("retrying twilio api call")
         logger.error("sms send exceeded the max number of attempts - max atempts: {0}".format(attempts))
