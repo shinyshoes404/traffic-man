@@ -19,8 +19,13 @@ class Config:
 
 
     ### --- LOG PARAMETERS --- ###
+    if os.environ.get("TRAFFIC_MAN_LOG_LEVEL") == "debug":
+        set_log_level = logging.DEBUG
+    else:
+        set_log_level = logging.INFO
+
     log_path = os.path.join(etc_basedir, "traffic-man.log")
-    log_level = logging.INFO
+    log_level = set_log_level
     log_format = logging.Formatter(" %(asctime)s - [%(levelname)s] - %(name)s - %(message)s", "%Y-%m-%d %H:%M:%S %z")
     log_maxbytes = 5000000
     log_backup_count = 1
@@ -50,12 +55,7 @@ class Config:
 
     # times to check traffic condition
     traffic_check_times = [
-                            
-                            "12:51", 
-                            "12:52",
-                            "12:53",
-                            "12:04",
-                            "16:25",
+                            "16:00",
                             "16:30",
                             "16:45",
                             "17:00",
@@ -66,7 +66,9 @@ class Config:
                             "18:15",
                             "18:30",
                             "18:45",
-                            "19:00"
+                            "19:00",
+                            "19:15",
+                            "19:30"
                             ]
 
 
@@ -79,4 +81,4 @@ class Config:
                 ]
 
     # days of the week to check traffic
-    traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday"]

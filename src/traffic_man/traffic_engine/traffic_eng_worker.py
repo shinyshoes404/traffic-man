@@ -207,7 +207,7 @@ class TrafficEngine:
         ts = TwilioSender()
         results = ts.send_resolved_traffic_sms(phone_nums)
         if results:
-            store_result = TrafficEngine._store_sms_data(kill_q, db_req_q, db_res_traffic_eng_q, results)
+            store_result = TrafficEngine._store_sms_data(db_req_q, db_res_traffic_eng_q, results)
             return store_result
         return None
 
@@ -279,6 +279,7 @@ class TrafficEngine:
 
                     # get traffic conditions from db - reuse for each google call
                     traffic_cond_data = TrafficEngine._get_traffic_cond_data(db_req_q, db_res_traffic_eng_q)
+                    logger.debug("traffic conditions:\n{0}".format(traffic_cond_data))
 
                     # only proceed if we didn't run into an exception (False) when getting the traffic condition data,
                     #  getting back {} from the db is valid, because there may not be any traffic condition recorded yet for the day
@@ -287,11 +288,16 @@ class TrafficEngine:
                         # optimize the orig dest pairs for the Google maps api to limit the number of API calls we have to make without exceeding the limits enforced by the api
                         odp = OrigDestOptimizer(orig_dest_pairs)
                         optimized_orig_dest_list = odp.get_orig_dest_list()
+                        logger.debug("optimized orig dest list:\n{0}".format(optimized_orig_dest_list))
 
                         if optimized_orig_dest_list:
                             # loop through our optimized origin dest list, call google, and calculate results
                             for orig_dest_set in optimized_orig_dest_list:
+                                logger.debug("orig dest set:\n{0}".format(orig_dest_set))
+                                
                                 orig_list, dest_list = MapGoogler.build_orig_dest_lists(orig_dest_set)
+                                logger.debug("orig list:\n{0}".format(orig_list))
+                                logger.debug("dest list:\n{0}".format(dest_list))
 
                                 # get traffic data from Google maps api
                                 mg = MapGoogler(orig_list, dest_list)
@@ -301,6 +307,7 @@ class TrafficEngine:
                                 if google_maps_raw: 
                                     # calculate and restructure google data
                                     struct_google_data = MapGoogler.calc_traffic(google_maps_raw, orig_dest_set)
+                                    logger.debug("structured google data:\n{0}".format(struct_google_data))
 
                                     # only proceed if we were able to successfully restructure the data and calculate the traffic ratio
                                     if struct_google_data:
@@ -313,6 +320,8 @@ class TrafficEngine:
                                         # determine with orig dest pairs that need to traffic conditions updated (traffic is bad, traffic is resolved) and sms messages sent
                                         tdp = TrafficDataProc(struct_google_data, traffic_cond_data)
                                         bad_traff_phone_nums, resolved_traff_phone_nums = TrafficEngine._proc_traffic_conditions(db_req_q, db_res_traffic_eng_q, tdp)
+                                        logger.debug("bad traffic phone nums:\n{0}".format(bad_traff_phone_nums))
+                                        logger.debug("resolved traffic phone nums:\n{0}".format(resolved_traff_phone_nums))
 
                                         # send our sms messages and store a record of what we sent in the database
                                         if bad_traff_phone_nums is not None:

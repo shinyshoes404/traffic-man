@@ -23,7 +23,9 @@ class SMSData:
         try:
             phone_num_subqry = phone_numbers.select(phone_numbers.c.phone_num
                                 ).where(phone_numbers.c.origin_place_id == orig_place_id,
-                                        phone_numbers.c.dest_place_id == dest_place_id).subquery()
+                                        phone_numbers.c.dest_place_id == dest_place_id,
+                                        phone_numbers.c.status == "sub",
+                                        phone_numbers.c.auth_status == "auth").subquery()
             
             sms_sent_subqry = sms_data.select(sms_data.c.phone_num
                                         ).where(sms_data.c.datetime >= self.curr_date,
@@ -46,10 +48,10 @@ class SMSData:
             return None
         
         if len(results_data) == 0:
-            logger.info("{0} sms message already sent for origin: {1}  dest: {2}".format(type, orig_place_id, dest_place_id))
+            logger.info("{0} sms message already sent for origin: {1}  dest: {2}".format(sms_type, orig_place_id, dest_place_id))
             return []
         
-        logger.info("{0} phone numbers need a {1} sms sent to them".format(len(results_data), type))
+        logger.info("{0} phone numbers need a {1} sms sent to them".format(len(results_data), sms_type))
         phone_num_list = []
         for row in results_data:
             phone_num_list.append(row[0])
@@ -57,11 +59,11 @@ class SMSData:
         return phone_num_list
         
 
-    def write_sms_records(self, sms_data: list) -> int:
-        logger.info("attempting to add {0} sms records for {1}".format(len(sms_data), self.curr_date))
+    def write_sms_records(self, sms_data_list: list) -> int:
+        logger.info("attempting to add {0} sms records for {1}".format(len(sms_data_list), self.curr_date))
         error_count = 0
         # inserting one at a time so one bad record doesn't prevent the rest from being written to the db
-        for record in sms_data:
+        for record in sms_data_list:
             try:
                 qry = sms_data.insert().values(record)
                 with self.engine.connect() as connection:
