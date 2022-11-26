@@ -1,5 +1,5 @@
 import unittest, mock, os, datetime
-from traffic_man.db_ops import DataSetup, TrafficDateTime, TrafficData, SMSData
+from traffic_man.db.db_ops import DataSetup, TrafficDateTime, TrafficData, SMSData
 
 class TestDataSetup(unittest.TestCase):
 

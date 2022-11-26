@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='traffic-man',
-    version='0.1.1',
+    version='1.0.0-alpha.1',
     description="An application that checks for bad traffic between two points using the Google Maps API at set times and sends SMS notifications using Twilio.",
     long_description=readme_long_description,
     long_description_content_type="text/markdown",
@@ -18,7 +18,7 @@ setup(
     entry_points = { 'console_scripts' : ['start-traffic-man=traffic_man.entrypoint:main']},
     
     install_requires=[
-        'requests', 'sqlalchemy'
+        'requests', 'sqlalchemy', 'pandas'
     ],
 
     extras_require={

@@ -72,7 +72,7 @@ __Process diagram__
     - Change the TRAFFIC_MAN_ENV variable to `dev`, so the log and db file will be stored in the project directory.  
     __Note:__ You will want to change this valud back to `prod` before starting your docker container.
  - Before running traffic man, you need to export all of the variables you just set into your environment.
-     - If you are using using bash (or gitbash), run this command `export $(grep -v '^#' .env | xargs)`  
+     - If you are using using bash (or gitbash), run this command `export $(grep -v '^#' .env | xargs)`  __Note:__ The .env-template file is set to use eol=lf. If you copy this template file to create your .env file, make sure that it is using lf for end of line, not crlf. crlf will cause a \r character to be included with your environment variables when using a bash terminal (should only be an issue when runninga bash terminal on Windows)
 __Note:__ Never put your real API keys and phone numbers in the .env-template file. The .env file is included in our .gitignore file, and will not be committed to our git history. .env-template is part of the poject, and will be commited to git history.
 
 #### Install traffic man
