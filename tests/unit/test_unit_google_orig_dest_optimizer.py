@@ -129,7 +129,3 @@ class TestOrigDestOptimizer(unittest.TestCase):
                         test_obj = OrigDestOptimizer(["fake", "list"])
                         check_val = test_obj.get_orig_dest_list()
                         self.assertEqual(check_val, ["fake","group","list"])
-                        
-obj = TestOrigDestOptimizer()
-obj.test_group_orig_dest_hit_dest_limit()
-
