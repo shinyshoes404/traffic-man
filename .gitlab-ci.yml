@@ -37,7 +37,7 @@ stages:
   - echo "python version" && python --version
   - mkdir -p /etc/traffic-man
   - python -m pip install --upgrade pip
-  - pip install -e .[dev]
+  - pip install  .[dev]
   - coverage run --source=src -m unittest discover -v -s tests/unit
   - coverage xml
   - coverage report -m | grep TOTAL
@@ -49,7 +49,7 @@ stages:
   - echo "python version"; python --version
   - mkdir $env:userprofile\.traffic-man
   - python -m pip install --upgrade pip
-  - pip install -e .[dev]
+  - pip install .[dev]
   - coverage run --source=src -m unittest discover -v -s tests/unit
   - coverage xml
   - coverage report -m | Select-String "TOTAL"
