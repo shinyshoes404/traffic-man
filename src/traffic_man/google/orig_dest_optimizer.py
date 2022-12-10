@@ -13,16 +13,20 @@ logger.addHandler(Config.stout_handler)
 class OrigDestOptimizer:
 
     def __init__(self, orig_dest_list: list, dest_limit=25, element_limit=100):
-        # expecting a distcint list of tuples from a sqlalchemy query result
-        # ex: [("DhIJr7A7RcQEyYcRfYNPekurSZQ", "JrIJr7A7RcQEyYcRfYNPekurSZ1"), ("DhIJr7A7RcQEyYcRfYNPekurSZQ", "XsIJr7A7RcQEyYcRfYNPekurSnT")]
         self.orig_dest_data = orig_dest_list
         self.dest_limit = dest_limit
         self.element_limit = element_limit
     
     def get_orig_dest_list(self) -> list:
-        data_shaped = self._shape_data()
-        dest_breakdown_data = self._dest_breakdown(data_shaped)
-        final_orig_dest_data = self._group_orig_dest(dest_breakdown_data)
+        try:
+            data_shaped = self._shape_data()
+            dest_breakdown_data = self._dest_breakdown(data_shaped)
+            final_orig_dest_data = self._group_orig_dest(dest_breakdown_data)
+        except Exception as e:
+            logger.error("problem optimizing origin destination list")
+            logger.error(e)
+            return None
+
         if self._verify_result(final_orig_dest_data):
             logger.info("origin destination list has been optimized for Google api requests")
             return final_orig_dest_data
@@ -44,6 +48,7 @@ class OrigDestOptimizer:
     
     # breakdown large destination lists to less than the dest_limit
     def _dest_breakdown(self, data_shaped: list) -> list:
+        data_shaped.sort(key = lambda i: i[1]) # sorting is crticial since we start from the end of the list and work forward
         dest_list_breakdown = []
         for i in range(1, len(data_shaped) + 1):
             if data_shaped[-1*i][1] > self.dest_limit:
@@ -97,7 +102,7 @@ class OrigDestOptimizer:
 
             if len(dest_list_breakdown) - i == j:
                 break
-        
+         
         return final_data_set
 
     def _verify_result(self, final_data_set: list) -> bool:
