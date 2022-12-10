@@ -1,4 +1,7 @@
 # traffic-man
+
+## Out of date
+This readme needs to be updated to reflect design changes starting in v1.0.0-alpha.1
 ## Overview
 traffic man is a dockerized application that checks for bad traffic conditions between two points using the Google Maps API on set days and times and sends SMS notifications when traffic conditions exceed a configurable threshold using Twilio.  
   
