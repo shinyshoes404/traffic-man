@@ -104,7 +104,7 @@ class TrafficData:
             with self.engine.connect() as connection:
                 connection.execute(qry)
         except Exception as e:
-            logger.error("problem writing traffic resolved record for orig id: {1}, dest_id: {2}".format(orig_place_id, dest_place_id))
+            logger.error("problem writing traffic resolved record for orig id: {0}, dest_id: {1}".format(orig_place_id, dest_place_id))
             logger.error(e)
             return None
         
