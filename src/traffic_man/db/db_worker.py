@@ -47,6 +47,3 @@ def db_worker(kill_q, db_req_q, db_res_traffic_eng_q):
                 db_res_traffic_eng_q.put({"msg-id": msg_id, "msg_src": msg_src, "results": db_op_result})
         except Empty:
             logger.debug("db request queue is empty")
-
-
-     
