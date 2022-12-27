@@ -1,8 +1,7 @@
 import sqlalchemy as db
 
-from traffic_man.db.models import phone_numbers, traffic_data, traffic_conditions
+from traffic_man.db.models import phone_numbers
 from traffic_man.config import Config
-from datetime import datetime
 import logging
 
 # Logging setup
@@ -50,7 +49,7 @@ class UserData:
                     phone_numbers.c.dest_place_id == orig_dest_pair[1]
             )
         
-            with self.engine.conect() as connection:
+            with self.engine.connect() as connection:
                 results_obj = connection.execute(qry)
                 results_data = results_obj.fetchall()
         except Exception as e:
