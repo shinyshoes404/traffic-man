@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from traffic_man.config import Config
 
 # Logging setup
@@ -72,6 +73,9 @@ class TrafficDataProc:
                     new_bad_traff_res = merged_df.query("traffic_condition.isnull()")
 
                     if not new_bad_traff_res.empty:
+
+                        # replace nan with None
+                        new_bad_traff_res.replace({np.nan:None}, inplace=True)
 
                         # convert the result data frame into a list of objects that is easy to insert into the db
                         new_bad_traff_res_list = new_bad_traff_res.to_dict("records")

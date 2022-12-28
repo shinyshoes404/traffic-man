@@ -50,10 +50,9 @@ def main():
             sleep(5)
             print("traffic man is running")
     except KeyboardInterrupt:
-        kill_q.put("kill")
-        kill_q.put("kill")
-        kill_q.put("kill")
-        print("shutting down traffic man")
+        for i in range (0,10):
+            kill_q.put("kill")
+        logger.warning("shutting down traffic man")
     
     db_worker_thread.join()
     traffic_eng_worker_thread.join()
