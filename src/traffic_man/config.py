@@ -75,13 +75,13 @@ class Config:
 
     # the language you want Google to use in its API response
     language = "en"
-    logger.info("google language param set to: {0}".format(language))
+    logger.info("google language param defaulting to: {0}".format(language))
 
     ### --- TRAFFIC_MAN_PARAMS --- ###
     # traffic overage parameter
     try:
         overage_parameter = float(os.environ.get("TRAFFIC_MAN_OVERAGE_PARAM"))
-        logger.info("traffic man overage parameter set based on environ var to: {0}".format(overage_parameter))
+        logger.info("traffic man overage parameter set to: {0}".format(overage_parameter))
     except:        
         overage_parameter = 0.1
         logger.info("traffic man overage parameter defaulting to: {0}".format(overage_parameter))
@@ -89,7 +89,7 @@ class Config:
     # times to check traffic conditions
     try:
         traffic_check_times = os.environ.get("TRAFFIC_MAN_CHECK_TIMES").split("|")
-        logger.info("traffic man check times set based on environ var to: {0}".format(traffic_check_times))
+        logger.info("traffic man check times set to: {0}".format(traffic_check_times))
 
     except:
         traffic_check_times = [
@@ -115,7 +115,7 @@ class Config:
     # days you don't want to check traffic, because it is a holiday
     try:
         holidays = os.environ.get("TRAFFIC_MAN_HOLIDAYS").split("|")
-        logger.info("traffic man holidays param set based on environ var to: {0}".format(holidays))
+        logger.info("traffic man holidays param set to: {0}".format(holidays))
     except:
         holidays =  [
                     "2022-12-26",
@@ -139,7 +139,7 @@ class Config:
     # days of the week to check traffic
     try:
         traffic_check_days = os.environ.get("TRAFFIC_MAN_CHECK_DAYS").split("|")
-        logger.info("traffic man check days set based on environ var to: {0}".format(traffic_check_days))
+        logger.info("traffic man check days set to: {0}".format(traffic_check_days))
     except:
         traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
         logger.info("traffic man check days param defaulted to: {0}".format(traffic_check_days))
