@@ -1,84 +1,63 @@
-from traffic_man.db_ops import DataSetup, TrafficDateTime, TrafficData, SMSData
-from traffic_man.google import MapGoogler
+banner = """
+  ##############################################################################################
+
+                #####   #######     #     ######   #######  ###  #     #   #####  
+               #           #      #   #   #     #     #      #   # #   #  #       
+                #####      #     #     #  ######      #      #   #  #  #  #  #### 
+                     #     #     #######  #   #       #      #   #   # #  #     # 
+                #####      #     #     #  #     #     #     ###  #     #   #####
+ 
+   #######  ######      #     #######  #######  ###   #####       #     #     #     #     # 
+      #     #     #   #   #   #        #         #   #            # # # #   #   #   # #   # 
+      #     ######   #     #  #####    #####     #   #            #  #  #  #     #  #  #  # 
+      #     #   #    #######  #        #         #   #            #     #  #######  #   # # 
+      #     #     #  #     #  #        #        ###   #####       #     #  #     #  #     #
+
+###############################################################################################
+
+
+"""
+print(banner)
+
 from traffic_man.config import Config
-from traffic_man.twilio import TwilioSender
+from traffic_man.db.db_worker import db_worker
+from traffic_man.traffic_engine.traffic_eng_worker import TrafficEngine
+
 from time import sleep
-import logging
-
-import sqlalchemy as db
-from traffic_man.config import Config
-from traffic_man.models import metadata_obj
-
-engine = db.create_engine('sqlite:///' + Config.db_path)
-metadata_obj.create_all(engine)
+import threading
+from queue import Queue
 
 # Logging setup
+import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(Config.log_level)
 logger.addHandler(Config.file_handler)
 logger.addHandler(Config.stout_handler)
 
-# need for unit testing
-def keep_running():
-    return True
-
 def main():
-    # db setup - If any of these steps are not successful return, do not move forward
-    logger.info("setting up the database")
+    db_req_q = Queue()
+    db_res_traffic_eng_q = Queue()
+    kill_q = Queue()
 
-    data_setup = DataSetup(engine)
-    if not data_setup.update_check_times():
-        return None
-    if not data_setup.update_holidays():
-        return None
-    if not data_setup.update_check_days():
-        return None
-    if not data_setup.update_phone_numbers():
-        return None
+    db_worker_thread = threading.Thread(target=db_worker, args=[kill_q, db_req_q, db_res_traffic_eng_q])
+    traffic_eng_worker_thread = threading.Thread(target=TrafficEngine.traffic_eng_worker, args=[kill_q, db_req_q, db_res_traffic_eng_q])
+    
+    db_worker_thread.start()
+    traffic_eng_worker_thread.start()
 
-    logger.info("database setup complete")
+    try:
+        while True:
+            sleep(5)
+            print("traffic man is running")
+    except KeyboardInterrupt:
+        for i in range (0,10):
+            kill_q.put("kill")
+        logger.warning("shutting down traffic man")
+    
+    db_worker_thread.join()
+    traffic_eng_worker_thread.join()
 
-    # implementing keep_running, just for unit testing
-    while keep_running():
-        traffic_date = TrafficDateTime(engine)
 
-        sleep_seconds, flag_1201 = traffic_date.get_next_run_sleep_seconds()
-        logger.info("seconds to sleep until next run: {0}".format(sleep_seconds))
-        sleep(sleep_seconds)
+if __name__ == "__main__":
+    main()
 
-        # only run through the rest of the routine (including API calls that cost money) if we weren't just sleeping until 12:01 AM the following day
-        if not flag_1201:
-
-            map_googler = MapGoogler()
-            raw_maps_data = map_googler.google_call_with_retry(3)
-        
-            # only move forward if we were able to get google maps data
-            if raw_maps_data:
-            
-                maps_data_tranformed = MapGoogler.calc_traffic(raw_maps_data)
-                # only move forward if the raw data was successfully transformed
-                if maps_data_tranformed:
-                    traffic_data = TrafficData(engine)
-                    traffic_data.store_traffic_data(maps_data_tranformed)
-
-                    if maps_data_tranformed["traffic_ratio"] >= Config.overage_parameter:        
-                        traffic_condition = traffic_data.check_traffic_conditions()
-                        if traffic_condition == None:
-                            traffic_data.write_bad_traffic()                        
-                            # don't send more than one bad traffic sms per day
-                            sms_data = SMSData(engine)                        
-                            if sms_data.check_sms_today("bad traffic") == False:  
-                                twilio_sender = TwilioSender()                   
-                                err_count = twilio_sender.send_bad_traffic_sms(traffic_data.get_phone_numbers())
-                                sms_data.write_sms_record("bad traffic", err_count)
-                    
-                    elif maps_data_tranformed["traffic_ratio"] < (Config.overage_parameter * 0.5):
-                        traffic_condition = traffic_data.check_traffic_conditions()
-                        if traffic_condition == "traffic":
-                            traffic_data.write_traffic_resolved()
-                            # don't send more than one traffic resolved sms per day
-                            sms_data = SMSData(engine)
-                            if sms_data.check_sms_today("traffic resolved") == False:
-                                twilio_sender = TwilioSender()
-                                err_count = twilio_sender.send_resolved_traffic_sms(traffic_data.get_phone_numbers())
-                                sms_data.write_sms_record("traffic resolved", err_count)
