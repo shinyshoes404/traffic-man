@@ -63,13 +63,7 @@ class TrafficDataMgr:
         msg_id = str(uuid.uuid4())
 
         msg = {"msg-id": msg_id, "msg-src": TrafficDataMgr.msg_src, "command": "STORE_TRAFFIC_DATA", "class-args": [], "method-args": [traffic_data]}
-        try:
-            db_req_q.put(msg)
-        except Exception as e:
-            logger.error("problem putting msg on the queue to store traffic data\n\tmsg: {0}".format(msg))
-            logger.error(e)
-            return False
-
+        db_req_q.put(msg)
         try:
             resp_msg = db_res_traffic_eng_q.get(timeout=10)
         except Empty:
@@ -85,13 +79,7 @@ class TrafficDataMgr:
         msg_id = str(uuid.uuid4())
 
         msg = {"msg-id": msg_id, "msg-src": TrafficDataMgr.msg_src, "command": "WRITE_BAD_TRAFFIC", "class-args": [], "method-args": [orig_place_id, dest_place_id]}
-        try:
-            db_req_q.put(msg)
-        except Exception as e:
-            logger.error("problem putting msg on the queue to store bad traffic records\n\tmsg: {0}".format(msg))
-            logger.error(e)
-            return False
-
+        db_req_q.put(msg)
         try:
             resp_msg = db_res_traffic_eng_q.get(timeout=10)
         except Empty:
@@ -106,17 +94,11 @@ class TrafficDataMgr:
     
 
     @staticmethod
-    def store_resolved_traffic(db_req_q, db_res_traffic_eng_q, orig_place_id, dest_place_id):
+    def store_resolved_traffic(db_req_q, db_res_traffic_eng_q, orig_place_id: str, dest_place_id: str):
         msg_id = str(uuid.uuid4())
 
         msg = {"msg-id": msg_id, "msg-src": TrafficDataMgr.msg_src, "command": "WRITE_TRAFFIC_RESOLVED", "class-args": [], "method-args": [orig_place_id, dest_place_id]}
-        try:
-            db_req_q.put(msg)
-        except Exception as e:
-            logger.error("problem putting msg on the queue to store resolved traffic records\n\tmsg: {0}".format(msg))
-            logger.error(e)
-            return False
-            
+        db_req_q.put(msg)
         try:
             resp_msg = db_res_traffic_eng_q.get(timeout=10)
         except Empty:
@@ -132,13 +114,7 @@ class TrafficDataMgr:
         msg_id = str(uuid.uuid4())
 
         msg = {"msg-id": msg_id, "msg-src": TrafficDataMgr.msg_src, "command": "GET_SMS_LIST_BY_TYPE", "class-args": [], "method-args": [sms_type, orig_place_id, dest_place_id]}
-        try:
-            db_req_q.put(msg)
-        except Exception as e:
-            logger.error("problem putting msg on the queue to get phone numbers \n\tmsg: {0}".format(msg))
-            logger.error(e)
-            return False
-        
+        db_req_q.put(msg)
         try:
             resp_msg = db_res_traffic_eng_q.get(timeout=10)
         except Empty:
@@ -157,12 +133,7 @@ class TrafficDataMgr:
         msg_id = str(uuid.uuid4())
 
         msg = {"msg-id": msg_id, "msg-src": TrafficDataMgr.msg_src, "command": "WRITE_SMS_RECORDS", "class-args": [], "method-args": [sms_data]}
-        try:
-            db_req_q.put(msg)
-        except Exception as e:
-            logger.error("problem putting msg on the queue to store sms data\n\tmsg: {0}".format(msg))
-            logger.error(e)
-            return False
+        db_req_q.put(msg)
         
         try:
             resp_msg = db_res_traffic_eng_q.get(timeout=10)

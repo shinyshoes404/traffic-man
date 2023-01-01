@@ -40,10 +40,10 @@ class TrafficEngine:
                 logger.error("problem getting seconds to sleep, setting to default of 60 sec")
                 sleep_seconds = 60
                 flag_1201 = True
-            else:
-                logger.info("seconds to sleep until next run: {0}".format(sleep_seconds))
-                if not TrafficEngine._sleep_routine(kill_q, sleep_seconds):
-                    break
+                
+            logger.info("seconds to sleep until next run: {0}".format(sleep_seconds))
+            if not TrafficEngine._sleep_routine(kill_q, sleep_seconds):
+                break
 
             if not flag_1201:
 
