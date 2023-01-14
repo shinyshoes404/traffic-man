@@ -1,5 +1,5 @@
 # defining how directives provided by outside processes via msg queue map to
-# database operation functions in db_ops
+# database operation functions
 
 from traffic_man.db.traffic_date_time import TrafficDateTime
 from traffic_man.db.traffic_data import TrafficData
