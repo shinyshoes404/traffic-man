@@ -1,5 +1,3 @@
-# syntax = docker/dockerfile:1.0-experimental
-### NOTE: The comment line above is critical. It allows for the user of Docker Buildkit to inject secrets in the image at build time ###
 # to build docker image
 # $ export DOCKER_BUILDKIT=1
 # $ docker build -t traffic-man:latest .
