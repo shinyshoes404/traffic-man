@@ -1,8 +1,13 @@
-# to build docker image
+# to build redis docker image for development and testing
 # $ export DOCKER_BUILDKIT=1
-# $ docker build -t traffic-man:latest .
+# $ docker build --no-cache --target redis_stage -t traffic-man-redis-testing .
 
-FROM python:3.10.1-slim-bullseye
+# to build the production docker image
+# $ export DOCKER_BUILDKIT=1
+# $ docker build --no-cache -t traffic-man .
+
+
+FROM python:3.10.1-slim-bullseye AS base
 
 
 #### ---- ARGS AND ENVS FOR BUILD ---- ####
@@ -32,7 +37,7 @@ ENV TZ=America/Chicago
 # disable root user
 # create our default user (this user will run the app)
 RUN apt-get update && \
-    apt-get upgrade -y && \
+    apt full-upgrade -y && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     apt-get install locales -y && \
@@ -48,6 +53,18 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+
+FROM base AS redis_stage
+# install redis
+# update the bind directive in the redis config to allow outside hosts to access (for testing dev environment only)
+RUN apt-get install redis -y && \
+    sed -i -e 's/bind 127.0.0.1 ::1/bind 0.0.0.0/' /etc/redis/redis.conf
+
+
+FROM redis_stage AS python_stage
+
+# set redis config back to bind to 127.0.0.1 for production use
+RUN sed -i -e 's/bind 0.0.0.0/bind 127.0.0.1/' /etc/redis/redis.conf
 
 #### ---- PYTHON and APP ---- ####
 

@@ -18,7 +18,7 @@ setup(
     entry_points = { 'console_scripts' : ['start-traffic-man=traffic_man.entrypoint:main']},
     
     install_requires=[
-        'requests', 'sqlalchemy', 'pandas'
+        'requests', 'sqlalchemy', 'pandas', 'redis'
     ],
 
     extras_require={

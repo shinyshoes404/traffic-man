@@ -143,3 +143,15 @@ class Config:
     except:
         traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
         logger.info("traffic man check days param defaulted to: {0}".format(traffic_check_days))
+
+    
+    ### -- REDIS PARAMETERS --- ###
+    redis_host = os.environ.get("REDIS_HOST")
+    redis_port = int(os.environ.get("REDIS_PORT"))
+    redis_pw = os.environ.get("REDIS_PW")
+    redis_db = int(os.environ.get("REDIS_DB"))
+    redis_sms_stream_key = "sms_stream"
+    redis_sms_consum_grp = "sms_consum_grp"
+    redis_msg_read_count = 3
+    redis_block_time_ms = 1000
+
