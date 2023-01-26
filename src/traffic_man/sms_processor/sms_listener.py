@@ -14,8 +14,14 @@ class SMSListener:
     def get_message(redis_conn, redis_stream_key, redis_consumer_grp, consumer_name, msg_read_count, block_time_ms, inbound_sms_q, kill_q):
         
         while kill_q.empty():
-            streams = redis_conn.xreadgroup(groupname=redis_consumer_grp, consumername=consumer_name, streams={redis_stream_key: ">"}, count=msg_read_count, block=block_time_ms)
-        
+            try:
+                streams = redis_conn.xreadgroup(groupname=redis_consumer_grp, consumername=consumer_name, streams={redis_stream_key: ">"}, count=msg_read_count, block=block_time_ms)
+            
+            except Exception as e:
+                logger.error("problem fetching message from redis with stream: {0} , consumer group: {1}, and consumer name: {2}".format(redis_stream_key, redis_consumer_grp, consumer_name))
+                logger.error(e)
+                streams = None
+                
             if streams:
                 logger.info("{0} messages retrieved from redis stream {1}".format(len(streams[0][1]), streams[0][0]))
                 

@@ -1,9 +1,10 @@
-import os, base64, requests, logging
+import os, base64, requests, hashlib, hmac
 from traffic_man.config import Config
 from datetime import datetime
 from time import sleep
 
 # Logging setup
+import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(Config.log_level)
 logger.addHandler(Config.file_handler)
@@ -108,3 +109,44 @@ class TwilioSender:
                 logger.warning("retrying twilio api call")
         logger.error("sms send exceeded the max number of attempts - max atempts: {0}".format(attempts))
         return None
+
+
+class TwilioSignature:
+    def __init__(self, request_body, headers):
+        self.request_body = request_body
+        self.headers = headers
+    
+    def _get_header_sig(self) -> str:
+        if self.headers.get("X-Twilio-Signature"):
+            return self.headers.get("X-Twilio-Signature")        
+        logger.warning("twilio signature header is missing")
+        return None
+    
+    def _create_param_str(self) -> str:
+        req_body_dict = self.request_body.form.to_dict()
+        keys = list(req_body_dict.keys())
+        keys.sort()
+        param_str = ""
+        for key in keys:
+            param_str = param_str + key + "=" + req_body_dict.get(key)
+        
+        return param_str
+    
+    def _create_signature(self) -> str:
+        key = bytes(os.environ.get("TWILIO_AUTH_TOKEN"), "UTF-8")
+        contents = bytes(os.environ.get("TWILIO_WEBHOOK_URL") + self._create_param_str(), "UTF-8")
+        hmac_obj = hmac.new(key, contents, hashlib.sha1)
+        signature = hmac_obj.digest()
+        signature_base64 = base64.b64encode(signature).decode('UTF-8')
+
+        return signature_base64
+    
+    def compare_signatures(self) -> bool:
+        header_signature = self._get_header_sig()
+        if not header_signature:
+            return False
+        
+        if header_signature == self._create_signature():
+            return True
+        
+        return False

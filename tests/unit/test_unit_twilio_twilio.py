@@ -1,5 +1,5 @@
 import unittest, mock, os, requests
-from traffic_man.twilio.twilio import TwilioSender
+from traffic_man.twilio.twilio import TwilioSender, TwilioSignature
 
 class TestTwilioSender(unittest.TestCase):
     ### ---------------- TwilioSender.__init__() ----------------    
@@ -136,3 +136,33 @@ class TestTwilioSender(unittest.TestCase):
             check_val = twilio_sender.send_sms_with_retry(2, "fake body", "+13333333333")
             self.assertIs(check_val, None)
             self.assertEqual(mock_send_sms.call_count, 2)
+
+
+
+class TestTwilioSignature(unittest.TestCase):
+    ### ---------------- TwilioSignatue.compare_signatures() ----------------
+    def test_unit_twilio_header_missing(self):
+        mock_req_body = mock.Mock()
+        test_headers = {"X-Wrong-Header": "some-data"}
+        test_obj = TwilioSignature(mock_req_body, test_headers)
+        self.assertIs(test_obj.compare_signatures(), False)
+
+    @mock.patch.dict(os.environ, {"TWILIO_AUTH_TOKEN": "ABC123", "TWILIO_WEBHOOK_URL": "https://example.com"})
+    def test_unit_signature_doesnt_match(self):
+        mock_req_body = mock.Mock()
+        mock_req_body.form.to_dict = mock.PropertyMock(return_value={"key1": "val1", "key2": "val2"})
+
+        test_headers = {"X-Twilio-Signature": "wrong-signature"}
+
+        test_obj = TwilioSignature(mock_req_body, test_headers)
+        self.assertIs(test_obj.compare_signatures(), False)
+
+    @mock.patch.dict(os.environ, {"TWILIO_AUTH_TOKEN": "ABC123", "TWILIO_WEBHOOK_URL": "https://example.com"})
+    def test_unit_signature_matches(self):
+        mock_req_body = mock.Mock()
+        mock_req_body.form.to_dict = mock.PropertyMock(return_value={"key1": "val1", "key2": "val2"})
+        #sig = ('ZsxfO_KDEDDHrR2lwbVZCQjIfWE='.encode('UTF-8')).decode('ASCII')
+        test_headers = {"X-Twilio-Signature": "ZsxfO/KDEDDHrR2lwbVZCQjIfWE="}
+
+        test_obj = TwilioSignature(mock_req_body, test_headers)
+        self.assertIs(test_obj.compare_signatures(), True)
