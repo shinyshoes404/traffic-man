@@ -112,7 +112,7 @@ class TwilioSender:
 
 
 class TwilioSignature:
-    def __init__(self, request_body, headers):
+    def __init__(self, request_body, headers: dict):
         self.request_body = request_body
         self.headers = headers
     

@@ -1,7 +1,7 @@
-import unittest, mock
+from unittest import TestCase, mock
 from traffic_man.sms_processor.sms_listener import SMSListener
 
-class TestSMSListener(unittest.TestCase):
+class TestSMSListener(TestCase):
     ### ---------------- SMSListener.get_message() ----------------
     def test_unit_get_message_except_xreadgroup(self):
         mock_redis_con = mock.Mock()

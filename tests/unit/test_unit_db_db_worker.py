@@ -1,4 +1,4 @@
-import unittest, mock
+from unittest import TestCase, mock
 from queue import Empty
 from traffic_man.db.db_worker import db_worker
 
@@ -15,7 +15,7 @@ mock_db_ops_map_obj.get.return_value = mock.PropertyMock(new_callable=mock.Mock(
 @mock.patch("traffic_man.db.db_worker.metadata_obj.create_all")
 @mock.patch("traffic_man.db.db_worker.DataSetup")
 @mock.patch("traffic_man.db.db_worker.db_ops_mapping", return_value=fake_mapping)
-class TestDBWorker(unittest.TestCase):
+class TestDBWorker(TestCase):
 
     mock_kill_q = mock.Mock()
     mock_db_req_q = mock.Mock()    

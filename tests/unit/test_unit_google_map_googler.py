@@ -1,11 +1,12 @@
-import mock, unittest, os, requests, urllib.parse
+from unittest import TestCase, mock
+import os, requests, urllib.parse
 from traffic_man.google.map_googler import MapGoogler
 from datetime import datetime
 
 
 
 
-class TestMapGoogler(unittest.TestCase):
+class TestMapGoogler(TestCase):
     
     ### ---------------- MapGoogler.__init__() ----------------    
     @mock.patch.dict(os.environ, {"GOOGLE_API_KEY":"fake-api-key"})

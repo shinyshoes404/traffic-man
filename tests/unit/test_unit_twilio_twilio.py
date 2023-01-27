@@ -1,7 +1,8 @@
-import unittest, mock, os, requests
+from unittest import TestCase, mock
+import os, requests
 from traffic_man.twilio.twilio import TwilioSender, TwilioSignature
 
-class TestTwilioSender(unittest.TestCase):
+class TestTwilioSender(TestCase):
     ### ---------------- TwilioSender.__init__() ----------------    
     # just verifying that the base64 encoding is working properly for basic auth
     def test_unit_TwilioSender_init(self):
@@ -139,7 +140,7 @@ class TestTwilioSender(unittest.TestCase):
 
 
 
-class TestTwilioSignature(unittest.TestCase):
+class TestTwilioSignature(TestCase):
     ### ---------------- TwilioSignatue.compare_signatures() ----------------
     def test_unit_twilio_header_missing(self):
         mock_req_body = mock.Mock()
