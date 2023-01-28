@@ -2,6 +2,7 @@ from traffic_man.config import Config
 from flask import Flask, request, make_response
 from flask_cors import CORS
 import redis
+from werkzeug.exceptions import BadRequest
 
 from traffic_man.twilio.twilio import TwilioSignature
 
@@ -15,9 +16,12 @@ logger.addHandler(Config.stout_handler)
 sms_api = Flask(__name__)
 
 CORS(sms_api)
+# gloabl var to keep track of redis consumer group issues
+redis_cons_grp_status = "no error"
 
 @sms_api.before_first_request
-def redis_create_consumer_grp():    
+def _redis_create_consumer_grp():   
+    global redis_cons_grp_status
     redis_conn = redis.Redis(host=Config.redis_host, port=Config.redis_port, db=Config.redis_db, password=Config.redis_pw, decode_responses=True)
     try:
         redis_conn.xgroup_create(name=Config.redis_sms_stream_key, groupname=Config.redis_sms_consum_grp, mkstream=True, id="$")
@@ -26,9 +30,16 @@ def redis_create_consumer_grp():
         if str(e) == "BUSYGROUP Consumer Group name already exists":
             logger.info("consumer group {0} already exists - moving on".format(Config.redis_sms_consum_grp))
         else:
-            raise 
+            logger.error("problem creating consumer group in redis")
+            logger.error(e)
+            redis_cons_grp_status = "error"
+    except Exception as e:
+        logger.error("problem creating consumer group in redis")
+        logger.error(e)
+        redis_cons_grp_status = "error"
 
-def sms_msg_producer(msg: dict) -> bool:
+
+def _sms_msg_producer(msg: dict) -> bool:
     redis_conn = redis.Redis(host=Config.redis_host, port=Config.redis_port, db=Config.redis_db, password=Config.redis_pw, decode_responses=True)
     try:
         redis_conn.xadd(Config.redis_sms_stream_key, msg, "*")
@@ -42,6 +53,11 @@ def sms_msg_producer(msg: dict) -> bool:
 
 @sms_api.route("/inbound", methods=["POST"])
 def inbound_sms():
+    global redis_cons_grp_status
+    if redis_cons_grp_status == "error":
+        resp = make_response("internal server error", 500)
+        return(resp)
+
     req_headers = request.headers
     twilio_sig = TwilioSignature(request, req_headers)
 
@@ -50,9 +66,11 @@ def inbound_sms():
         return resp
     
     req_data = request.form.to_dict()
-    sms_msg_producer(req_data)
+    if not _sms_msg_producer(req_data):
+        resp = make_response("internal server error", 500)
+        return resp
 
-    resp = make_response("<Response><Message>Message received</Message></Response>", 200)
+    resp = make_response("<Response></Response>", 200)
     resp.headers["Content-Type"] = "text/html"
     return resp
 
