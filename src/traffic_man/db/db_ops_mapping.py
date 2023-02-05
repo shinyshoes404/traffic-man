@@ -15,5 +15,7 @@ db_ops_mapping = {
     "GET_SMS_LIST_BY_TYPE": {"class": SMSData, "method": SMSData.get_phone_nums},
     "WRITE_SMS_RECORDS": {"class": SMSData, "method": SMSData.write_sms_records},
     "GET_ORIG_DEST_PAIRS" : {"class": UserData, "method": UserData.get_orig_dest_pairs},
-    "GET_SUB_PHONE_NUMS_BY_ORIG_DEST": {"class": UserData, "method": UserData.get_sub_phone_numbers_by_orig_dest_pair}
+    "GET_SUB_PHONE_NUMS_BY_ORIG_DEST": {"class": UserData, "method": UserData.get_sub_phone_numbers_by_orig_dest_pair},
+    "GET_USER_BY_PHONE_NUM": {"class": UserData, "method": UserData.get_user_by_phone_num},
+    "SET_USER_BY_PHONE_NUM": {"class": UserData, "method": UserData.set_user_by_phone_number}
 }

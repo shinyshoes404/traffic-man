@@ -1,8 +1,7 @@
 from traffic_man.config import Config
 from flask import Flask, request, make_response
 from flask_cors import CORS
-import redis
-from werkzeug.exceptions import BadRequest
+import redis, datetime
 
 from traffic_man.twilio.twilio import TwilioSignature
 
@@ -41,6 +40,7 @@ def _redis_create_consumer_grp():
 
 def _sms_msg_producer(msg: dict) -> bool:
     redis_conn = redis.Redis(host=Config.redis_host, port=Config.redis_port, db=Config.redis_db, password=Config.redis_pw, decode_responses=True)
+    msg["received_datetime"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     try:
         redis_conn.xadd(Config.redis_sms_stream_key, msg, "*")
     except Exception as e:
