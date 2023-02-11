@@ -13,7 +13,7 @@ class SMSMsg:
     auto_reply_words = {
         "unsubcribe": ["stop", "stopall", "unsubscribe", "cancel", "quit", "end"],
         "subscribe": ["start", "yes", "unstop"],
-        "help": ["help", "info"]
+        "info": ["help", "info"]
     }
 
     def __init__(self, sms_body: str, from_num: str, msg_rec_datetime: str):
@@ -30,8 +30,8 @@ class SMSMsg:
             self.auto_status = "usub"
         elif self.sms_body.strip() in self.auto_reply_words["subscribe"]:
             self.auto_status = "sub"
-        elif self.sms_body.strip() in self.auto_reply_words["help"]:
-            self.auto_status = "help"
+        elif self.sms_body.strip() in self.auto_reply_words["info"]:
+            self.auto_status = "info"
         else:
             self.auto_status = "not-auto"
 
