@@ -1,6 +1,6 @@
 import uuid
 from traffic_man.config import Config
-from queue import Empty
+from queue import Empty, Queue
 
 # Logging setup
 import logging
@@ -13,9 +13,9 @@ class SMSDataMgr:
     msg_src = "sms_processor"
 
     @staticmethod
-    def log_sms_msg(from_num: str, sms_msg: str, sms_type: str, sms_status: str, msg_rec_datetime: str, sms_direction: str, db_req_q, db_res_sms_q):
+    def log_sms_msg(from_num: str, sms_msg: str, sms_type: str, sms_status: str, msg_datetime: str, sms_direction: str, db_req_q, db_res_sms_q):
         msg_id = str(uuid.uuid4())
-        sms_data = [{"datetime": msg_rec_datetime, "sms_type": sms_type, "status": sms_status, "direction": sms_direction, "msg_content": sms_msg, "phone_num": from_num}]
+        sms_data = [{"datetime": msg_datetime, "sms_type": sms_type, "status": sms_status, "direction": sms_direction, "msg_content": sms_msg, "phone_num": from_num}]
         msg = {"msg-id": msg_id, "msg-src": SMSDataMgr.msg_src, "command": "WRITE_SMS_RECORDS", "class-args": [], "method-args": [sms_data]}
 
         db_req_q.put(msg)
@@ -32,7 +32,7 @@ class SMSDataMgr:
         return resp_msg.get("results")
     
     @staticmethod
-    def get_user_by_phone_num(phone_num: str, db_req_q, db_res_sms_q):
+    def get_user_by_phone_num(phone_num: str, db_req_q: Queue, db_res_sms_q: Queue):
         msg_id = str(uuid.uuid4())
         msg = {"msg-id": msg_id, "msg-src": SMSDataMgr.msg_src, "command": "GET_USER_BY_PHONE_NUM", "class-args": [], "method-args": [phone_num]}
 

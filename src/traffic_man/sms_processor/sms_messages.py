@@ -1,5 +1,4 @@
 from traffic_man.config import Config
-from traffic_man.sms_processor.sms_data_manager import SMSDataMgr
 
 # Logging setup
 import logging
@@ -11,7 +10,7 @@ logger.addHandler(Config.stout_handler)
 
 class SMSMsg:
     auto_reply_words = {
-        "unsubcribe": ["stop", "stopall", "unsubscribe", "cancel", "quit", "end"],
+        "unsubscribe": ["stop", "stopall", "unsubscribe", "cancel", "quit", "end"],
         "subscribe": ["start", "yes", "unstop"],
         "info": ["help", "info"]
     }
@@ -26,11 +25,11 @@ class SMSMsg:
     
     def _set_auto_status(self) -> None:
 
-        if self.sms_body.strip() in self.auto_reply_words["unsubscribe"]:
-            self.auto_status = "usub"
-        elif self.sms_body.strip() in self.auto_reply_words["subscribe"]:
+        if self.sms_body.replace(" ", "").lower() in self.auto_reply_words["unsubscribe"]:
+            self.auto_status = "unsub"
+        elif self.sms_body.replace(" ", "").lower() in self.auto_reply_words["subscribe"]:
             self.auto_status = "sub"
-        elif self.sms_body.strip() in self.auto_reply_words["info"]:
+        elif self.sms_body.replace(" ", "").lower() in self.auto_reply_words["info"]:
             self.auto_status = "info"
         else:
             self.auto_status = "not-auto"

@@ -87,6 +87,7 @@ class UserData:
             "auth_status": results_data[0][4]
             }        
         logger.info("found {0} users".format(len(results_data)))
+        logger.info("user data: {0}".format(results_dict))
         return results_dict
         
     def set_user_by_phone_number(self, user_data: dict, new: bool):

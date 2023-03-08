@@ -1,4 +1,5 @@
 from traffic_man.config import Config
+from traffic_man.sms_processor.sms_messages import SMSMsg
 from flask import Flask, request, make_response
 from flask_cors import CORS
 import redis, datetime
@@ -66,6 +67,7 @@ def inbound_sms():
         return resp
     
     req_data = request.form.to_dict()
+
     if not _sms_msg_producer(req_data):
         resp = make_response("internal server error", 500)
         return resp
