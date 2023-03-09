@@ -493,3 +493,129 @@ class TestSMSWorker(TestCase):
         self.assertEqual(phone_num_rows[0][0], sms_object_1["From"])
         self.assertEqual(phone_num_rows[0][3], "sub")
         self.assertEqual(phone_num_rows[0][4], "auth")
+
+
+    def test_int_new_unsub_existing_info_existing_auth_existing_sub(self, mock_db_path, mock_twilio_sender):
+        test_id = str(uuid.uuid4())
+        logger.info(test_id + "-START")
+        mock_db_path.return_value = self.test_db_location    
+        mock_twilio_sender.return_value.send_needs_setup_sms.return_value = (True, "test needs setup")
+        mock_twilio_sender.return_value.send_sub_sms.return_value = (True, "test sub")
+
+        sms_object_1 = {
+            "Body": "sT op",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:40"
+        }
+
+        sms_object_2 = {
+            "Body": "helP",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:41"
+        }
+        sms_object_3 = {
+            "Body": "My  secrEt PhrasE",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:42"
+        }
+
+        sms_object_4 = {
+            "Body": "s t ART ",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:43"
+        }
+
+
+
+        self.util_test_engine([sms_object_1, sms_object_2, sms_object_3, sms_object_4])
+
+        # manually update user data
+        conn = sqlite3.connect(self.test_db_location)
+        cur = conn.cursor()
+
+        cur.execute("UPDATE phone_numbers SET origin_place_id = 'orig1', dest_place_id = 'dest1' WHERE phone_num = '+12223334444';")
+        conn.commit()
+        cur.close()
+        conn.close() 
+
+        sms_object_5 = {
+            "Body": "s t ART ",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:44"
+        }
+
+        self.util_test_engine([sms_object_5])
+
+        logger.info(test_id + "-END")
+
+
+        # check test log file for errors
+        log_error = self.util_check_log_for_errors(test_id)
+        self.assertIs(log_error, False)
+
+        # check the data in the db
+        conn = sqlite3.connect(self.test_db_location)
+        cur = conn.cursor()
+
+        cur.execute("SELECT * FROM sms_data;")
+        sms_rows = cur.fetchall()
+
+        cur.execute("SELECT * FROM phone_numbers;")
+        phone_num_rows = cur.fetchall()
+
+        cur.close()
+        conn.close() 
+
+        self.assertEqual(len(sms_rows), 7)
+
+        self.assertEqual(sms_rows[0][1], sms_object_1["received_datetime"])
+        self.assertEqual(sms_rows[0][2], "unsubscribe")
+        self.assertEqual(sms_rows[0][3], "received")
+        self.assertEqual(sms_rows[0][4], "inbound")
+        self.assertEqual(sms_rows[0][5], sms_object_1["Body"])
+        self.assertAlmostEqual(sms_rows[0][6], sms_object_1["From"][:12])
+
+        self.assertEqual(sms_rows[1][1], sms_object_2["received_datetime"])
+        self.assertEqual(sms_rows[1][2], "info")
+        self.assertEqual(sms_rows[1][3], "received")
+        self.assertEqual(sms_rows[1][4], "inbound")
+        self.assertEqual(sms_rows[1][5], sms_object_2["Body"])
+        self.assertEqual(sms_rows[1][6], sms_object_2["From"][:12])
+
+        self.assertEqual(sms_rows[2][1], sms_object_3["received_datetime"])
+        self.assertEqual(sms_rows[2][2], "general")
+        self.assertEqual(sms_rows[2][3], "received")
+        self.assertEqual(sms_rows[2][4], "inbound")
+        self.assertEqual(sms_rows[2][5], sms_object_3["Body"])
+        self.assertEqual(sms_rows[2][6], sms_object_3["From"][:12])
+
+        self.assertEqual(sms_rows[3][1], sms_object_4["received_datetime"])
+        self.assertEqual(sms_rows[3][2], "subscribe")
+        self.assertEqual(sms_rows[3][3], "received")
+        self.assertEqual(sms_rows[3][4], "inbound")
+        self.assertEqual(sms_rows[3][5], sms_object_4["Body"])
+        self.assertEqual(sms_rows[3][6], sms_object_4["From"][:12])
+
+        self.assertEqual(sms_rows[4][2], "needs setup")
+        self.assertEqual(sms_rows[4][3], "sent")
+        self.assertEqual(sms_rows[4][4], "outbound")
+        self.assertEqual(sms_rows[4][5], "test needs setup")
+        self.assertEqual(sms_rows[4][6], sms_object_4["From"][:12])
+
+        self.assertEqual(sms_rows[5][1], sms_object_5["received_datetime"])
+        self.assertEqual(sms_rows[5][2], "subscribe")
+        self.assertEqual(sms_rows[5][3], "received")
+        self.assertEqual(sms_rows[5][4], "inbound")
+        self.assertEqual(sms_rows[5][5], sms_object_5["Body"])
+        self.assertEqual(sms_rows[5][6], sms_object_5["From"][:12])
+
+        self.assertEqual(sms_rows[6][2], "subscribe")
+        self.assertEqual(sms_rows[6][3], "sent")
+        self.assertEqual(sms_rows[6][4], "outbound")
+        self.assertEqual(sms_rows[6][5], "test sub")
+        self.assertEqual(sms_rows[6][6], sms_object_5["From"][:12])
+
+        self.assertEqual(len(phone_num_rows), 1)
+        self.assertEqual(phone_num_rows[0][0], sms_object_1["From"])
+        self.assertEqual(phone_num_rows[0][3], "sub")
+        self.assertEqual(phone_num_rows[0][4], "auth")

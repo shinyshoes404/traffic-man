@@ -46,7 +46,7 @@ class SMSWorker:
         else:
             sms_status = "failed"
         
-        SMSDataMgr.log_sms_msg(phone_num, sms_body, "auth needed", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(phone_num, sms_body, "subscribe", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
@@ -149,7 +149,7 @@ class SMSWorker:
             elif sms_user.status == "needs setup":
                 SMSWorker._send_needs_setup_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
             else:
-                SMSWorker._send_sub_sms(ts, sms_user, db_req_q, db_res_sms_q)
+                SMSWorker._send_sub_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
 
         elif sms_msg.auto_status == "info":
             if sms_user.auth_status == "not auth":
@@ -179,8 +179,10 @@ class SMSWorker:
     def _update_user_attributes(sms_user: SMSUser, sms_msg: SMSMsg) -> None:
         if sms_msg.auto_status == "unsub":
             sms_user.status = "unsub"
-        elif sms_msg.auto_status == "sub" and sms_user.status != "needs setup":
+        elif sms_msg.auto_status == "sub" and sms_user.origin_place_id and sms_user.dest_place_id:
             sms_user.status = "sub"
+        elif sms_msg.auto_status == "sub" and (not sms_user.origin_place_id or not sms_user.dest_place_id):
+            sms_user.status = "needs setup"
         
         if sms_user.auth_status != "auth":
             if SMSWorker._check_auth(sms_msg):

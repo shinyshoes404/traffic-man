@@ -31,6 +31,7 @@ class SMSUser:
                 self.dest_place_id = get_user_result["dest_place_id"]
                 self.status = get_user_result["status"]
                 self.auth_status = get_user_result["auth_status"]
+                              
             else:
                 self.new_user = True
                 self.origin_place_id = None
