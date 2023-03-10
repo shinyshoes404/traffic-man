@@ -26,7 +26,7 @@ setup(
         'dev': ['coverage', 'mock']
     },
 
-    python_requires = '>=3.9.*',
+    python_requires = '>=3.9',
 
     classifiers=[
         'License :: OSI Approved :: MIT License',
