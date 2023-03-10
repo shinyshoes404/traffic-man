@@ -619,3 +619,150 @@ class TestSMSWorker(TestCase):
         self.assertEqual(phone_num_rows[0][0], sms_object_1["From"])
         self.assertEqual(phone_num_rows[0][3], "sub")
         self.assertEqual(phone_num_rows[0][4], "auth")
+
+
+
+    def test_int_new_sub_exist_notauth_exist_auth_success_exist_needs_setup_exist_authed_setup(self, mock_db_path, mock_twilio_sender):
+        test_id = str(uuid.uuid4())
+        logger.info(test_id + "-START")
+        mock_db_path.return_value = self.test_db_location    
+        mock_twilio_sender.return_value.send_needs_setup_sms.return_value = (True, "test needs setup")
+        mock_twilio_sender.return_value.send_auth_success_sms.return_value = (True, "test auth success")
+        mock_twilio_sender.return_value.send_user_info_sms.return_value = (True, "test info")
+        mock_twilio_sender.return_value.send_need_auth_sms.return_value = (True, "test need auth")
+
+        sms_object_1 = {
+            "Body": "start",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:40"
+        }
+
+        sms_object_2 = {
+            "Body": "random sms 1",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:41"
+        }
+        sms_object_3 = {
+            "Body": "My  secrEt PhrasE",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:42"
+        }
+
+        sms_object_4 = {
+            "Body": "random sms 2",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:43"
+        }
+
+
+
+        self.util_test_engine([sms_object_1, sms_object_2, sms_object_3, sms_object_4])
+
+        # manually update user data
+        conn = sqlite3.connect(self.test_db_location)
+        cur = conn.cursor()
+
+        cur.execute("UPDATE phone_numbers SET origin_place_id = 'orig1', dest_place_id = 'dest1', status = 'sub' WHERE phone_num = '+12223334444';")
+        conn.commit()
+        cur.close()
+        conn.close() 
+
+        sms_object_5 = {
+            "Body": "random sms 3",
+            "From": "+12223334444",
+            "received_datetime": "2023-01-11 04:27:44"
+        }
+
+        self.util_test_engine([sms_object_5])
+
+        logger.info(test_id + "-END")
+
+
+        # check test log file for errors
+        log_error = self.util_check_log_for_errors(test_id)
+        self.assertIs(log_error, False)
+
+        # check the data in the db
+        conn = sqlite3.connect(self.test_db_location)
+        cur = conn.cursor()
+
+        cur.execute("SELECT * FROM sms_data;")
+        sms_rows = cur.fetchall()
+
+        cur.execute("SELECT * FROM phone_numbers;")
+        phone_num_rows = cur.fetchall()
+
+        cur.close()
+        conn.close() 
+
+        self.assertEqual(len(sms_rows), 10)
+
+        self.assertEqual(sms_rows[0][1], sms_object_1["received_datetime"])
+        self.assertEqual(sms_rows[0][2], "subscribe")
+        self.assertEqual(sms_rows[0][3], "received")
+        self.assertEqual(sms_rows[0][4], "inbound")
+        self.assertEqual(sms_rows[0][5], sms_object_1["Body"])
+        self.assertAlmostEqual(sms_rows[0][6], sms_object_1["From"][:12])
+
+        self.assertEqual(sms_rows[1][2], "auth needed")
+        self.assertEqual(sms_rows[1][3], "sent")
+        self.assertEqual(sms_rows[1][4], "outbound")
+        self.assertEqual(sms_rows[1][5], "test need auth")
+        self.assertEqual(sms_rows[1][6], sms_object_1["From"][:12])
+
+        self.assertEqual(sms_rows[2][1], sms_object_2["received_datetime"])
+        self.assertEqual(sms_rows[2][2], "general")
+        self.assertEqual(sms_rows[2][3], "received")
+        self.assertEqual(sms_rows[2][4], "inbound")
+        self.assertEqual(sms_rows[2][5], sms_object_2["Body"])
+        self.assertEqual(sms_rows[2][6], sms_object_2["From"][:12])
+
+        self.assertEqual(sms_rows[3][2], "auth needed")
+        self.assertEqual(sms_rows[3][3], "sent")
+        self.assertEqual(sms_rows[3][4], "outbound")
+        self.assertEqual(sms_rows[3][5], "test need auth")
+        self.assertEqual(sms_rows[3][6], sms_object_1["From"][:12])
+
+        self.assertEqual(sms_rows[4][1], sms_object_3["received_datetime"])
+        self.assertEqual(sms_rows[4][2], "general")
+        self.assertEqual(sms_rows[4][3], "received")
+        self.assertEqual(sms_rows[4][4], "inbound")
+        self.assertEqual(sms_rows[4][5], sms_object_3["Body"])
+        self.assertEqual(sms_rows[4][6], sms_object_3["From"][:12])
+
+        self.assertEqual(sms_rows[5][2], "auth success")
+        self.assertEqual(sms_rows[5][3], "sent")
+        self.assertEqual(sms_rows[5][4], "outbound")
+        self.assertEqual(sms_rows[5][5], "test auth success")
+        self.assertEqual(sms_rows[5][6], sms_object_3["From"][:12])
+
+        self.assertEqual(sms_rows[6][1], sms_object_4["received_datetime"])
+        self.assertEqual(sms_rows[6][2], "general")
+        self.assertEqual(sms_rows[6][3], "received")
+        self.assertEqual(sms_rows[6][4], "inbound")
+        self.assertEqual(sms_rows[6][5], sms_object_4["Body"])
+        self.assertEqual(sms_rows[6][6], sms_object_4["From"][:12])
+
+        self.assertEqual(sms_rows[7][2], "needs setup")
+        self.assertEqual(sms_rows[7][3], "sent")
+        self.assertEqual(sms_rows[7][4], "outbound")
+        self.assertEqual(sms_rows[7][5], "test needs setup")
+        self.assertEqual(sms_rows[7][6], sms_object_4["From"][:12])
+
+        self.assertEqual(sms_rows[8][1], sms_object_5["received_datetime"])
+        self.assertEqual(sms_rows[8][2], "general")
+        self.assertEqual(sms_rows[8][3], "received")
+        self.assertEqual(sms_rows[8][4], "inbound")
+        self.assertEqual(sms_rows[8][5], sms_object_5["Body"])
+        self.assertEqual(sms_rows[8][6], sms_object_5["From"][:12])
+
+        self.assertEqual(sms_rows[9][2], "info")
+        self.assertEqual(sms_rows[9][3], "sent")
+        self.assertEqual(sms_rows[9][4], "outbound")
+        self.assertEqual(sms_rows[9][5], "test info")
+        self.assertEqual(sms_rows[9][6], sms_object_5["From"][:12])
+
+        self.assertEqual(len(phone_num_rows), 1)
+        self.assertEqual(phone_num_rows[0][0], sms_object_1["From"])
+        self.assertEqual(phone_num_rows[0][3], "sub")
+        self.assertEqual(phone_num_rows[0][4], "auth")
