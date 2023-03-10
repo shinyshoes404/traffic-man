@@ -38,8 +38,12 @@ stages:
   - mkdir -p /etc/traffic-man
   - python -m pip install --upgrade pip
   - pip install -e .[dev]
+  - export REDIS_PW='redispw'
+  - export REDIS_HOST='127.0.0.1'
+  - export REDIS_PORT='6379'
+  - export REDIS_DB='0'
   - coverage run --source=src -m unittest discover -v -s tests/unit
-  - coverage run -a  --source=src -m unittest discover -v -s tests/integration
+  - coverage run -a --source=src -m unittest discover -v -s tests/integration
   - coverage xml
   - coverage report -m | grep TOTAL
 
@@ -51,8 +55,12 @@ stages:
   - mkdir $env:userprofile\.traffic-man
   - python -m pip install --upgrade pip
   - pip install -e .[dev]
+  - export REDIS_PW='redispw'
+  - export REDIS_HOST='127.0.0.1'
+  - export REDIS_PORT='6379'
+  - export REDIS_DB='0'
   - coverage run --source=src -m unittest discover -v -s tests/unit
-  - coverage run -a  --source=src -m unittest discover -v -s tests/integration
+  - coverage run -a --source=src -m unittest discover -v -s tests/integration
   - coverage xml
   - coverage report -m | Select-String "TOTAL"
 
