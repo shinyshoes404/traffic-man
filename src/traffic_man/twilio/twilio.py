@@ -82,7 +82,7 @@ class TwilioSender:
 
     def send_need_auth_sms(self, phone_num: str) -> tuple[bool, str]:
         logger.info("attempting to send need auth sms to {0}".format(phone_num))
-        body = "Pass phrase needed. We need to you to send us the pass phrase before we set you up with Traffic Man."
+        body = "Pass phrase needed. We need you to send us the pass phrase before we set you up with Traffic Man."
 
         if not self.send_sms_with_retry(2, body, phone_num):
             logger.error("failed to send auth needed sms to {0}".format(phone_num))
@@ -223,9 +223,11 @@ class TwilioSignature:
     def compare_signatures(self) -> bool:
         header_signature = self._get_header_sig()
         if not header_signature:
+            logger.warning("request signature does not match what is expected")
             return False
         
         if header_signature == self._create_signature():
+            logger.info("request signature matches what is expected")
             return True
         
         return False

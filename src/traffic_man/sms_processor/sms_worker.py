@@ -92,6 +92,7 @@ class SMSWorker:
     @staticmethod
     def _check_auth(sms_msg: SMSMsg) -> bool:
         if sms_msg.sms_body.replace(" ", "").lower() == os.environ["TRAFFIC_MAN_CODE"].replace(" ", "").lower():
+            logger.info("pass phrase matches")
             return True
                 
         return False
@@ -185,10 +186,13 @@ class SMSWorker:
             sms_user.status = "needs setup"
         
         if sms_user.auth_status != "auth":
+            logger.info("user is not authorized - checking message for auth status")
             if SMSWorker._check_auth(sms_msg):
+                logger.info("user provided the correct pass phrase - authorizing")
                 sms_user.auth_status = "auth"
                 sms_user.new_auth = True
             else:
+                logger.info("user did not provide the correct pass phrase")
                 sms_user.auth_status = "not auth"
 
 
