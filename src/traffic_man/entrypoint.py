@@ -62,7 +62,7 @@ def main():
     try:
         while True:
             sleep(5)
-            print("traffic man is running")
+            logger.debug("traffic man is running")
     except KeyboardInterrupt:
         for i in range (0,10):
             kill_q.put("kill")

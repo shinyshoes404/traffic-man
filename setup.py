@@ -13,7 +13,7 @@ setup(
     author='shinyshoes',
     author_email='shinyshoes404@protonmail.com',
     license='MIT License',
-    packages=['traffic_man', 'traffic_man.db', 'traffic_man.traffic_engine', 'traffic_man.google', 'traffic_man.twilio', 'traffic_man.sms_processor'],
+    packages=['traffic_man', 'traffic_man.db', 'traffic_man.traffic_engine', 'traffic_man.google', 'traffic_man.twilio', 'traffic_man.sms_processor', 'traffic_man.api'],
     package_dir={'':'src'},
     entry_points = { 'console_scripts' : ['start-traffic-man=traffic_man.entrypoint:main']},
     

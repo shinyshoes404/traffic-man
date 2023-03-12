@@ -78,7 +78,8 @@ RUN mkdir -p ${PY_APP_DIR} && \
     mkdir -p ${ETC_DIR} && \
     chown ${USERNAME}:${USERNAME} ${ETC_DIR} && \
     chmod 700 ${ETC_DIR} && \
-    apt-get install python3-pip -y
+    apt-get install python3-pip -y && \
+    pip install gunicorn
 
 # copy the entire project into container image, so we can install it
 COPY ./ ${PY_APP_DIR}/
@@ -90,9 +91,13 @@ RUN cd ${PY_APP_DIR} && \
     pip install . && \
     rm -R ./*
 
+# copy the file we need to run the api back into the image
+COPY ./src/wsgi.py ${PY_APP_DIR}/
+
 #### --- WHAT TO DO WHEN THE CONTAINER STARTS --- ####
 
 #  make sure the default user owns the etc files
-#  start the application
+#  start the api with gunicorn and the traffic man application
 ENTRYPOINT chown -R ${USERNAME}:${USERNAME} ${ETC_DIR} && \
-    su ${USERNAME} -c "start-traffic-man"
+    redis-server --requirepass ${REDIS_PW} --daemonize yes && \
+    su ${USERNAME} -c 'start-traffic-man & cd ${PY_APP_DIR} && gunicorn --bind 0.0.0.0:8003 wsgi:sms_api'
