@@ -179,6 +179,7 @@ test-win-py310:                                                       # name of 
   - sleep 3                                                                                                                 # give the containers a few seconds to start
   - docker ps -a                                                                                                            # take a look at the environment we just stood up
   - ls -lh /builds/mnt/traffic-man-etc
+  - export $(grep -v '^#' .env-test | xargs)
   - python3 test_script.py
   - test_api_error=$(cat /builds/mnt/etc-testapi/testapi.log | { grep -c "\[ERROR\]" || true; })                                                          
   - |                                                                                                                       # check every 100 seconds to see if the uploads are done; stop looping if any errors are found - note:expecting 2 completed uploads based on app config and size of test upload file
