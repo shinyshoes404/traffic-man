@@ -79,6 +79,7 @@ RUN mkdir -p ${PY_APP_DIR} && \
     chown ${USERNAME}:${USERNAME} ${ETC_DIR} && \
     chmod 700 ${ETC_DIR} && \
     apt-get install python3-pip -y && \
+    python -m pip install --upgrade pip && \
     pip install gunicorn
 
 # copy the entire project into container image, so we can install it

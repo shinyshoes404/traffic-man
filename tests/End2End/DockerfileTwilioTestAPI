@@ -31,6 +31,7 @@ RUN apt-get update && \
 # use pip to install flask and gunicorn
 RUN mkdir -p ${PY_APP_DIR} && \
     apt-get install python3-pip -y && \
+    python -m pip install --upgrade pip && \
     pip install flask && \
     pip install gunicorn
 

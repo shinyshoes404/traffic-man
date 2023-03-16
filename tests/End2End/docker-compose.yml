@@ -6,7 +6,7 @@ services:
     tty: true
     stdin_open: true
     env_file:
-      - .env
+      - .env-test
 
   traffic-man:
     image: traffic-man:build
@@ -19,5 +19,5 @@ services:
     ports:
       - "0.0.0.0:8003:8003" 
     env_file:
-      - .env
+      - .env-test
 
