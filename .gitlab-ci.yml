@@ -169,8 +169,7 @@ test-win-py310:                                                       # name of 
   - apk upgrade                                                                                                             # upgrade the system
   - apk add --no-cache python3 py3-pip                                                                                      # install python
   - apk add docker-compose                                                                                                  # install docker-compose
-  - python3 -m pip install --upgrade pip
-  - pip install .
+  - pip install -e .[dev]
   - export DOCKER_BUILDKIT=1                                                                                                # set docker buildkit env var
   - docker build -t traffic-man:build .                                                                                # attempt to build the docker image we will test
   - mkdir -p /builds/mnt/traffic-man-etc                                                                                                   
