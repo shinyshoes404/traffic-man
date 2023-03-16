@@ -50,6 +50,8 @@ headers["Content-Type"] = "application/json"
 resp = requests.post(url="http://docker:8003/inbound", json=req_parameters, headers=headers)
 if resp.status_code != 200:
     print("failed intitial subscribe")
+    print(resp.status_code)
+    print(resp.content)
     sys.exit(1)
 
 
@@ -63,6 +65,8 @@ headers["Content-Type"] = "application/json"
 resp = requests.post(url="http://docker:8003/inbound", json=req_parameters, headers=headers)
 if resp.status_code != 200:
     print("failed pass phrase")
+    print(resp.status_code)
+    print(resp.content)
     sys.exit(1)
 
 # check the data in the db
