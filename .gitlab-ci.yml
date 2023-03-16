@@ -5,6 +5,7 @@
 stages:
   - unit-int-test
   - build-e2e
+  - cleanup
    
 
 ### ------------------------------------ END OF STAGES ---------------------------------------- ###
@@ -173,7 +174,7 @@ test-win-py310:                                                       # name of 
   - docker build -t traffic-man:build .                                                                                # attempt to build the docker image we will test
   - mkdir -p /builds/mnt/traffic-man-etc                                                                                                   
   - cd tests/End2End
-  - docker build -t twiliotest-api:latest -f DockerfileTwilioTestAPI                                                                                                                # move into the tests directory
+  - docker build -t twiliotest-api:latest -f DockerfileTwilioTestAPI .                                                                                                               # move into the tests directory
   - docker-compose up -d                                                                                                    # stand up our test environment/docker containers described by the docker-compose.yml file in the tests dir
   - sleep 3                                                                                                                 # give the containers a few seconds to start
   - docker ps -a                                                                                                            # take a look at the environment we just stood up
@@ -223,3 +224,34 @@ build-test:
       when: on_success   
 
     - when: never                                                     # If no criteria were matched, do not run this job
+
+
+### ------------------------------------------- CLEANUP JOBS ------------------------------------------ ###
+
+# build job to build docker image and verify it is working
+cleanup:
+  stage: cleanup
+  image: docker:23.0.1-alpine3.17                                    # I'm not sure if we neeed to use the docker image again to clear out the builds dir
+  tags:
+    - shared-docker
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+
+  script:
+    - rm -rf /builds/mnt                                              # clear out the builds directory
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"  || $CI_COMMIT_BRANCH == "user-registrations" # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: always
+
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: always   
+    
+    - when: never
+
+
+
+
+### ------------------------------------------ END CLEANUP JOBS ---------------------------------------- ###
