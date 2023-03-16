@@ -213,7 +213,7 @@ build-test:
   script: *script-build-e2e
 
   rules:
-    - if: $CI_COMMIT_BRANCH == "user-registration"                    # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
+    - if: $CI_COMMIT_BRANCH == "user-registrations"                    # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success                                                # Execute job if jobs from previous stage are successful.
 
