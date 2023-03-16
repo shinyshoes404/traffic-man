@@ -1,0 +1,43 @@
+FROM python:3.10.1-slim-bullseye AS base
+
+
+#### ---- ARGS AND ENVS FOR BUILD ---- ####
+
+### - ENVS - ###
+
+# default user
+ENV USERNAME=twiliotest
+# set the python applications root directory
+ENV PY_ROOT_DIR=/home/${USERNAME}/python_apps
+# set the directory to store your python application
+ENV PY_APP_DIR=${PY_ROOT_DIR}/twiliotest
+
+
+#### ---- BASIC SYSTEM SETUP ---- ####
+
+# check for updates 
+# then upgrade the base packages
+# disable root user
+# create our default user (this user will run the app)
+RUN apt-get update && \
+    apt full-upgrade -y && \
+    passwd -l root &&\
+    $(useradd -s /bin/bash -m ${USERNAME})
+
+#### ---- PYTHON and APP ---- ####
+
+# create directory for python app
+# install pip3
+# use pip to install flask and gunicorn
+RUN mkdir -p ${PY_APP_DIR} && \
+    apt-get install python3-pip -y && \
+    pip install flask && \
+    pip install gunicorn
+
+# copy the entire project into container image, so we can install it
+COPY ./twiliotest_api.py ${PY_APP_DIR}/
+
+#### --- WHAT TO DO WHEN THE CONTAINER STARTS --- ####
+
+#  start the test api with gunicorn
+ENTRYPOINT  su ${USERNAME} -c 'cd ${PY_APP_DIR} && gunicorn --bind 0.0.0.0:8000 twiliotest_api:twiliotest_api'

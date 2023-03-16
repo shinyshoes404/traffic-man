@@ -155,3 +155,8 @@ class Config:
     redis_msg_read_count = 3
     redis_block_time_ms = 1000
 
+    ### -- TWILIO PARAMETERS --- ###
+    if os.environ.get("TRAFFIC_MAN_ENV") == "test":
+        twilio_url = "http://twiliotest-api:8000"
+    else:
+        twilio_url = "https://api.twilio.com/2010-04-01/Accounts/"

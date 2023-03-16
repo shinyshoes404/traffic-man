@@ -13,7 +13,7 @@ logger.addHandler(Config.stout_handler)
 
 class TwilioSender:
     def __init__(self):
-        self.url = "https://api.twilio.com/2010-04-01/Accounts/" + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json"
+        self.url = Config.twilio_url + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json"
         
         basic_auth = os.environ.get("TWILIO_ACCOUNT_SID") + ":" + os.environ.get("TWILIO_AUTH_TOKEN")
         basic_auth_bytes = basic_auth.encode("utf-8")
