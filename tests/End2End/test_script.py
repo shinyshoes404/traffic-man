@@ -47,7 +47,7 @@ headers = {}
 ts = TwilioSignature(body, headers)
 headers["X-Twilio-Signature"] = ts._create_signature()
 headers["Content-Type"] = "application/json"
-resp = requests.post(url="http://127.0.0.1:8003/inbound", json=req_parameters, headers=headers)
+resp = requests.post(url="http://docker:8003/inbound", json=req_parameters, headers=headers)
 if resp.status_code != 200:
     print("failed intitial subscribe")
     sys.exit(1)
@@ -60,7 +60,7 @@ headers = {}
 ts = TwilioSignature(body, headers)
 headers["X-Twilio-Signature"] = ts._create_signature()
 headers["Content-Type"] = "application/json"
-resp = requests.post(url="http://127.0.0.1:8003/inbound", json=req_parameters, headers=headers)
+resp = requests.post(url="http://docker:8003/inbound", json=req_parameters, headers=headers)
 if resp.status_code != 200:
     print("failed pass phrase")
     sys.exit(1)
