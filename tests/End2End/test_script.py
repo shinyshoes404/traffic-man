@@ -52,6 +52,11 @@ if resp.status_code != 200:
     print("failed intitial subscribe")
     print(resp.status_code)
     print(resp.content)
+    print(os.environ.get("TWILIO_AUTH_TOKEN"))
+    print(os.environ.get("TWILIO_WEBHOOK_URL"))
+    print(ts._create_signature())
+    with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
+        print(log.read())
     sys.exit(1)
 
 
@@ -67,6 +72,11 @@ if resp.status_code != 200:
     print("failed pass phrase")
     print(resp.status_code)
     print(resp.content)
+    print(os.environ.get("TWILIO_AUTH_TOKEN"))
+    print(os.environ.get("TWILIO_WEBHOOK_URL"))
+    print(ts._create_signature())
+    with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
+        print(log.read())
     sys.exit(1)
 
 # check the data in the db
