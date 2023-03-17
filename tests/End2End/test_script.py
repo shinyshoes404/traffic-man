@@ -54,6 +54,7 @@ if resp.status_code != 200:
     print(resp.content)
     print(os.environ.get("TWILIO_AUTH_TOKEN"))
     print(os.environ.get("TWILIO_WEBHOOK_URL"))
+    print(ts._create_param_str())
     print(ts._create_signature())
     with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
         print(log.read())
@@ -74,6 +75,7 @@ if resp.status_code != 200:
     print(resp.content)
     print(os.environ.get("TWILIO_AUTH_TOKEN"))
     print(os.environ.get("TWILIO_WEBHOOK_URL"))
+    print(ts._create_param_str())
     print(ts._create_signature())
     with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
         print(log.read())
