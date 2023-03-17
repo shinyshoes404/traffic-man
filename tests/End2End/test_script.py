@@ -104,17 +104,26 @@ if len(sms_rows) != 4:
     print("failed sms data length")
     print(len(sms_rows))
     print(sms_rows)
+    print("------------- traffic-man.og --------------")
+    with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
+        print(log.read())
     sys.exit(1)
 
 if len(phone_num_rows) != 1:
     print("failed phone num lenth")
     print(len(phone_num_rows))
     print(phone_num_rows)
+    print("------------- traffic-man.og --------------")
+    with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
+        print(log.read())
     sys.exit()
 
 if phone_num_rows[0][3] != "needs setup" or phone_num_rows[0][4] != "auth":
     print("failed user validation")
     print(phone_num_rows)
+    print("------------- traffic-man.og --------------")
+    with open("/builds/mnt/traffic-man-etc/traffic-man.log", "r") as log:
+        print(log.read())
     sys.exit(1)
 
 print("tests passed")
