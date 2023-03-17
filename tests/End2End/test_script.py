@@ -39,8 +39,9 @@ class Body:
     def __init__(self, req_parameters: dict):
         self.form = Form(req_parameters)
 
-
+print("running test script")
 # initial subscribe
+print("initial subscribe")
 req_parameters = {"MessageSid": "randomid", "From": "+15555555555", "To": "+17777777777", "Body": "start"}
 body = Body(req_parameters)
 headers = {}
@@ -62,6 +63,7 @@ if resp.status_code != 200:
 
 
 # send pass phrase
+print("send pass phrase")
 req_parameters = {"MessageSid": "randomid", "From": "+15555555555", "To": "+17777777777", "Body": "Test code"}
 body = Body(req_parameters)
 headers = {}
@@ -103,3 +105,6 @@ if len(phone_num_rows) != 1:
 
 if phone_num_rows[0][3] != "needs setup" or phone_num_rows[0][4] != "auth":
     sys.exit(1)
+
+print("tests passed")
+sys.exit(0)
