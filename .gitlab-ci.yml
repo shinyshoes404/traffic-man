@@ -181,7 +181,7 @@ test-win-py310:                                                       # name of 
   - ls -lh /builds/mnt/traffic-man-etc
   - export $(grep -v '^#' .env-test | xargs)
   - python3 test_script.py
-  - test_api_error=$(cat /builds/mnt/etc-testapi/testapi.log | { grep -c "\[ERROR\]" || true; })                                                          
+  - test_api_error=$(cat /builds/mnt/traffic-man-etc/traffic-man.log | { grep -c "\[ERROR\]" || true; })                                                          
   - |                                                                                                                       # check every 100 seconds to see if the uploads are done; stop looping if any errors are found - note:expecting 2 completed uploads based on app config and size of test upload file
       echo "---- checking log ----";
       test_api_error=$(cat /builds/mnt/traffic-man-etc/traffic-man.log | { grep -c "\[ERROR\]" || true; });
@@ -193,7 +193,7 @@ test-win-py310:                                                       # name of 
             cat /builds/mnt/traffic-man-etc/traffic-man.log && 
             exit 1;
       fi;
-  - cat /builds/mnt/traffic-man-etc/traffic-man.log                                                              # print the onedrive-offsite.log file
+  - cat /builds/mnt/traffic-man-etc/traffic-man.log                                                             # print the onedrive-offsite.log file
 
 # build job to build docker image and verify it is working
 build-test:

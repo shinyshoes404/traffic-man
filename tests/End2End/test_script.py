@@ -83,28 +83,28 @@ if resp.status_code != 200:
         print(log.read())
     sys.exit(1)
 
+print("starting database checks")
 # check the data in the db
-# conn = sqlite3.connect("/builds/mnt/traffic-man-etc/traffic_man.db")
-# cur = conn.cursor()
+conn = sqlite3.connect("/builds/mnt/traffic-man-etc/traffic_man.db")
+cur = conn.cursor()
 
-# cur.execute("SELECT * FROM sms_data;")
-# sms_rows = cur.fetchall()
+cur.execute("SELECT * FROM sms_data;")
+sms_rows = cur.fetchall()
 
-# cur.execute("SELECT * FROM phone_numbers;")
-# phone_num_rows = cur.fetchall()
+cur.execute("SELECT * FROM phone_numbers;")
+phone_num_rows = cur.fetchall()
 
 
-# cur.close()
-# conn.close()
+cur.close()
+conn.close()
 
-# if len(sms_rows) != 4:
-#     sys.exit(1)
+if len(sms_rows) != 4:
+    sys.exit(1)
 
-# if len(phone_num_rows) != 1:
-#     sys.exit()
+if len(phone_num_rows) != 1:
+    sys.exit()
 
-# if phone_num_rows[0][3] != "needs setup" or phone_num_rows[0][4] != "auth":
-#     sys.exit(1)
+if phone_num_rows[0][3] != "needs setup" or phone_num_rows[0][4] != "auth":
+    sys.exit(1)
 
 print("tests passed")
-#sys.exit(0)
