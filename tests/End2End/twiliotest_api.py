@@ -27,5 +27,10 @@ def send_sms():
     res = make_response("", 201)
     return res
 
+@twiliotest_api.errorhandler(404)
+def not_found(e):
+    res = make_response("/" + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json", 404)
+    return res
+
 if __name__ == "__main__":
     twiliotest_api.run(host="0.0.0.0")
