@@ -31,6 +31,7 @@ class TestSMSWorker(TestCase):
 
             db_engine_thread = threading.Thread(name="db-engine", target=db_worker, args=[kill_q, db_req_q, db_res_traffic_eng_q, db_res_sms_q])
             db_engine_thread.start()
+            sleep(1)
 
             sms_proc_thread = threading.Thread(name="sms-proc", target=SMSWorker.sms_worker, args=[kill_q, db_req_q, db_res_sms_q, inbound_sms_q])
             sms_proc_thread.start()
