@@ -61,7 +61,7 @@ def inbound_sms():
 
     req_headers = request.headers
     twilio_sig = TwilioSignature(request, req_headers)
-    logger.info("twilio signature: {0}".format(twilio_sig._create_signature()))
+
     if not twilio_sig.compare_signatures():
         resp = make_response("not authorized", 403)
         return resp

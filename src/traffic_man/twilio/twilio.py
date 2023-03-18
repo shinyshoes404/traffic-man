@@ -14,7 +14,6 @@ logger.addHandler(Config.stout_handler)
 class TwilioSender:
     def __init__(self):
         self.url = Config.twilio_url + "/" + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json"
-        logger.warning(self.url)
         
         basic_auth = os.environ.get("TWILIO_ACCOUNT_SID") + ":" + os.environ.get("TWILIO_AUTH_TOKEN")
         basic_auth_bytes = basic_auth.encode("utf-8")
@@ -214,9 +213,6 @@ class TwilioSignature:
     def _create_signature(self) -> str:
         key = bytes(os.environ.get("TWILIO_AUTH_TOKEN"), "UTF-8")
         contents = bytes(os.environ.get("TWILIO_WEBHOOK_URL") + self._create_param_str(), "UTF-8")
-        logger.info(os.environ.get("TWILIO_AUTH_TOKEN"))
-        logger.info(os.environ.get("TWILIO_WEBHOOK_URL"))
-        logger.info(self._create_param_str())
         hmac_obj = hmac.new(key, contents, hashlib.sha1)
         signature = hmac_obj.digest()
         # encode hmac signature to base64, then decode bytes to be a utf-8 string

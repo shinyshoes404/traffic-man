@@ -34,7 +34,7 @@ class SMSWorker:
             sms_status = "sent"
         else:
             sms_status = "failed"        
-        SMSDataMgr.log_sms_msg(phone_num, sms_body, "auth needed", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(phone_num, sms_body, "auth needed", sms_status, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
@@ -46,7 +46,7 @@ class SMSWorker:
         else:
             sms_status = "failed"
         
-        SMSDataMgr.log_sms_msg(phone_num, sms_body, "subscribe", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(phone_num, sms_body, "subscribe", sms_status, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
@@ -56,7 +56,7 @@ class SMSWorker:
             sms_status = "sent"
         else:
             sms_status = "failed"        
-        SMSDataMgr.log_sms_msg(phone_num, sms_body, "auth success", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(phone_num, sms_body, "auth success", sms_status, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
@@ -66,7 +66,7 @@ class SMSWorker:
             sms_status = "sent"
         else:
             sms_status = "failed"
-        SMSDataMgr.log_sms_msg(phone_num, sms_body, "service error", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(phone_num, sms_body, "service error", sms_status, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
@@ -76,7 +76,7 @@ class SMSWorker:
             sms_status = "sent"
         else:
             sms_status = "failed"
-        SMSDataMgr.log_sms_msg(phone_num, sms_body, "needs setup", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(phone_num, sms_body, "needs setup", sms_status, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
@@ -86,7 +86,7 @@ class SMSWorker:
             sms_status = "sent"
         else:
             sms_status = "failed"
-        SMSDataMgr.log_sms_msg(sms_user.phone_num, sms_body, "info", sms_status, datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
+        SMSDataMgr.log_sms_msg(sms_user.phone_num, sms_body, "info", sms_status, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "outbound", db_req_q, db_res_sms_q)
 
 
     @staticmethod
