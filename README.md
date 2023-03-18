@@ -115,9 +115,18 @@ __Note:__ Never put your real API keys and phone numbers in the .env-template fi
  - To start traffic man you can run `start-traffic-man` in your terminal.  
  __Note:__ This will run the full application and start printing log statements to the terminal. It will also call the Google Maps and Twilio APIs with the crendentials you provided, which could result in charges to your account.
      
+#### Build the redis image and run the container
+ - Leverage multi-stage build to create a separate redis image to use for development and testing that should behave exactly like it will in production.
+ - Commands to build image and start redis container
+    - `export DOCKER_BUILDKIT=1` 
+    - `docker build --no-cache --target redis_stage -t traffic-man-redis-testing .`
+    - Run container - assumes REDIS_PW environment variable is set in your dev environment
+        - Gitbash in Windows: `docker run -itd -p 127.0.0.1:6379:6379 -e REDIS_PW=${REDIS_PW} traffic-man-redis-testing:latest  //bin//bash -c 'redis-server --requirepass ${REDIS_PW}  && bash'`
+        - Linux: `docker run -itd -p 127.0.0.1:6379:6379 -e REDIS_PW=${REDIS_PW} traffic-man-redis-testing:latest  /bin/bash -c 'redis-server --requirepass ${REDIS_PW}  && bash'`
 
 ### Testing
  - Run the suite of unit tests and record test coverage with `coverage run --source=src -m unittest discover -v -s tests/unit`
+ - Run the suite of integration tests and add coverage results to those captured during the unit test execution with `coverage run -a --source=src -m unittest discover -v -s tests/integration`
  - Generate an html report to see which modules and lines have test coverage by running the command `coverage html`
      - You can now navigate to the htmlcov directory that was created, and open the index.html file in your browser to see a report of test coverage and which lines of code still need to be covered (highlighted in red).
  - The .gitlab-ci.yml file included in this project is used to automate testing accross multiple environments on a private Gitlab server. This file could be modified for use on your own Gitlab server or gitlab.com, but will have no effect on Github.

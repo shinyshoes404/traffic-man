@@ -63,3 +63,57 @@ class UserData:
         
         logger.info("found {0} subcribed and authorized phone numbers for origin id {1} and dest id {2}".format(len(results_data), orig_dest_pair[0], orig_dest_pair[1]))
         return results_data
+    
+    def get_user_by_phone_num(self, phone_num: str):
+        try:
+            qry = phone_numbers.select().where(phone_numbers.c.phone_num == phone_num)
+            with self.engine.connect() as connection:
+                results_obj = connection.execute(qry)
+                results_data = results_obj.fetchall()
+        except Exception as e:
+            logger.error("problem getting users")
+            logger.error(e)
+            return False
+
+        if len(results_data) == 0:
+            logger.info("no users found")
+            return None
+        
+        results_dict = {
+            "phone_num": results_data[0][0],
+            "origin_place_id": results_data[0][1],
+            "dest_place_id": results_data[0][2],
+            "status": results_data[0][3],
+            "auth_status": results_data[0][4]
+            }        
+        logger.info("found {0} users".format(len(results_data)))
+        logger.info("user data: {0}".format(results_dict))
+        return results_dict
+        
+    def set_user_by_phone_number(self, user_data: dict, new: bool):
+        if new == True:
+            try:
+                qry = phone_numbers.insert(user_data)
+                with self.engine.connect() as connection:
+                    connection.execute(qry)
+            except Exception as e:
+                logger.error("problem inserting user data")
+                logger.error("\tdata: {0}".format(user_data))
+                logger.error(e)
+                return None
+            
+        else:
+            user_data_no_phone = user_data.copy()
+            try:
+                del user_data_no_phone["phone_num"]
+                qry = phone_numbers.update(phone_numbers.c.phone_num == user_data["phone_num"], user_data_no_phone)
+                with self.engine.connect() as connection:
+                    connection.execute(qry)
+            except Exception as e:
+                logger.error("problem updating user data")
+                logger.error("\tdata: {0}".format(user_data))
+                logger.error(e)
+                return None
+
+        return True
+            

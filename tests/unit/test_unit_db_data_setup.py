@@ -1,7 +1,7 @@
-import unittest, mock
+from unittest import TestCase, mock
 from traffic_man.db.data_setup import DataSetup
 
-class TestDataSetup(unittest.TestCase):
+class TestDataSetup(TestCase):
 
     ### --------------------- DataSetup.update_check_times() ----------------------
     def test_update_check_times_except_on_delete_execute(self):

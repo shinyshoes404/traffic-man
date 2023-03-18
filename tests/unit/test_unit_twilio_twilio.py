@@ -1,7 +1,8 @@
-import unittest, mock, os, requests
-from traffic_man.twilio.twilio import TwilioSender
+from unittest import TestCase, mock
+import os, requests
+from traffic_man.twilio.twilio import TwilioSender, TwilioSignature
 
-class TestTwilioSender(unittest.TestCase):
+class TestTwilioSender(TestCase):
     ### ---------------- TwilioSender.__init__() ----------------    
     # just verifying that the base64 encoding is working properly for basic auth
     def test_unit_TwilioSender_init(self):
@@ -48,6 +49,129 @@ class TestTwilioSender(unittest.TestCase):
             self.assertEqual(len(check_val), 2)
             self.assertEqual(mock_send_retry.call_count,2)
             self.assertEqual(check_val[0]["status"], "failed")
+
+
+    ### ---------------- TwilioSender.send_sub_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_sub_sms_no_errors(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_sub_sms("+12222222222")
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_sub_sms_failed(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_sub_sms("+12222222222")
+            self.assertIs(check_val_sent, False)
+
+
+    ### ---------------- TwilioSender.send_need_auth_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_need_auth_no_errors(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_need_auth_sms("+12222222222")
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_need_auth_failed(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_need_auth_sms("+12222222222")
+            self.assertIs(check_val_sent, False)
+
+
+    ### ---------------- TwilioSender.send_auth_failed_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_auth_failed_sms_no_errors(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_auth_failed_sms("+12222222222")
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_auth_failed_sms_failed(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_auth_failed_sms("+12222222222")
+            self.assertIs(check_val_sent, False)
+
+
+    ### ---------------- TwilioSender.send_auth_success_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_auth_success_sms_no_errors(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_auth_success_sms("+12222222222")
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_auth_success_sms_failed(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_auth_success_sms("+12222222222")
+            self.assertIs(check_val_sent, False)
+
+
+    ### ---------------- TwilioSender.send_service_error_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_service_error_sms_no_errors(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_service_error_sms("+12222222222")
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_service_error_sms_failed(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_service_error_sms("+12222222222")
+            self.assertIs(check_val_sent, False)      
+
+
+    ### ---------------- TwilioSender.send_needs_setup_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_needs_setup_sms_no_errors(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_needs_setup_sms("+12222222222")
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_needs_setup_sms_failed(self, mock_init):
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_needs_setup_sms("+12222222222")
+            self.assertIs(check_val_sent, False)  
+
+
+    ### ---------------- TwilioSender.send_user_info_sms() ----------------
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_user_info_sms_no_errors(self, mock_init):
+        mock_user = mock.Mock()
+        mock_user.phone_nun = "+12222222222"
+        mock_user.origin_place_id = "orig1"
+        mock_user.dest_place_id = "dest1"
+
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=True) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_user_info_sms(mock_user)
+            self.assertIs(check_val_sent, True)
+
+    @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
+    def test_unit_send_user_info_sms_failed(self, mock_init):
+        mock_user = mock.Mock()
+        mock_user.phone_nun = "+12222222222"
+        mock_user.origin_place_id = "orig1"
+        mock_user.dest_place_id = "dest1"
+
+        with mock.patch("traffic_man.twilio.twilio.TwilioSender.send_sms_with_retry", return_value=False) as mock_send_retry:
+            twilio_sender = TwilioSender()
+            check_val_sent, check_val_body = twilio_sender.send_user_info_sms(mock_user)
+            self.assertIs(check_val_sent, False)  
+
 
     ### ---------------- TwilioSender.send_sms() ----------------
     @mock.patch("traffic_man.twilio.twilio.TwilioSender.__init__", return_value=None) # mocking __init__ to avoid env var management, etc
@@ -136,3 +260,32 @@ class TestTwilioSender(unittest.TestCase):
             check_val = twilio_sender.send_sms_with_retry(2, "fake body", "+13333333333")
             self.assertIs(check_val, None)
             self.assertEqual(mock_send_sms.call_count, 2)
+
+
+
+class TestTwilioSignature(TestCase):
+    ### ---------------- TwilioSignatue.compare_signatures() ----------------
+    def test_unit_twilio_header_missing(self):
+        mock_req_body = mock.Mock()
+        test_headers = {"X-Wrong-Header": "some-data"}
+        test_obj = TwilioSignature(mock_req_body, test_headers)
+        self.assertIs(test_obj.compare_signatures(), False)
+
+    @mock.patch.dict(os.environ, {"TWILIO_AUTH_TOKEN": "ABC123", "TWILIO_WEBHOOK_URL": "https://example.com"})
+    def test_unit_signature_doesnt_match(self):
+        mock_req_body = mock.Mock()
+        mock_req_body.form.to_dict = mock.PropertyMock(return_value={"key1": "val1", "key2": "val2"})
+
+        test_headers = {"X-Twilio-Signature": "wrong-signature"}
+
+        test_obj = TwilioSignature(mock_req_body, test_headers)
+        self.assertIs(test_obj.compare_signatures(), False)
+
+    @mock.patch.dict(os.environ, {"TWILIO_AUTH_TOKEN": "ABC123", "TWILIO_WEBHOOK_URL": "https://example.com"})
+    def test_unit_signature_matches(self):
+        mock_req_body = mock.Mock()
+        mock_req_body.form.to_dict = mock.PropertyMock(return_value={"key1": "val1", "key2": "val2"})
+        test_headers = {"X-Twilio-Signature": "xUiKdFeXAF4O8V0PomCvfQCPkxg="}
+
+        test_obj = TwilioSignature(mock_req_body, test_headers)
+        self.assertIs(test_obj.compare_signatures(), True)

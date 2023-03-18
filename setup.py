@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='traffic-man',
-    version='1.0.0',
+    version='1.1.0-alpha.1',
     description="An application that checks for bad traffic between two points using the Google Maps API at set times and sends SMS notifications using Twilio.",
     long_description=readme_long_description,
     long_description_content_type="text/markdown",
@@ -13,12 +13,12 @@ setup(
     author='shinyshoes',
     author_email='shinyshoes404@protonmail.com',
     license='MIT License',
-    packages=['traffic_man', 'traffic_man.db', 'traffic_man.traffic_engine', 'traffic_man.google', 'traffic_man.twilio'],
+    packages=['traffic_man', 'traffic_man.db', 'traffic_man.traffic_engine', 'traffic_man.google', 'traffic_man.twilio', 'traffic_man.sms_processor', 'traffic_man.api'],
     package_dir={'':'src'},
     entry_points = { 'console_scripts' : ['start-traffic-man=traffic_man.entrypoint:main']},
     
     install_requires=[
-        'requests', 'sqlalchemy', 'pandas'
+        'requests', 'sqlalchemy==1.4.41', 'pandas', 'redis', 'flask', 'flask_cors'
     ],
 
     extras_require={
@@ -26,7 +26,7 @@ setup(
         'dev': ['coverage', 'mock']
     },
 
-    python_requires = '>=3.9.*',
+    python_requires = '>=3.9',
 
     classifiers=[
         'License :: OSI Approved :: MIT License',

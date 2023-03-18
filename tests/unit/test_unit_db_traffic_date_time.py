@@ -1,9 +1,9 @@
-import unittest, mock
+from unittest import TestCase, mock
 import datetime
 from traffic_man.db.traffic_date_time import TrafficDateTime
 
 
-class TestTrafficDateTime(unittest.TestCase):
+class TestTrafficDateTime(TestCase):
 
     ### --------------------- TrafficDateTime._get_1201_tomorrow() ----------------------
     @mock.patch("traffic_man.db.traffic_date_time.TrafficDateTime.__init__", return_value=None)
