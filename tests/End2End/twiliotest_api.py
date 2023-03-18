@@ -18,18 +18,13 @@ def send_sms():
         res = make_response("incorrect authorization", 403)
         return res
 
-    body = request.get_json()
+    body = request.form.to_dict()
     
     if not body.get("Body") or not body.get("To") or not body.get("From"):
         res = make_response("bad request", 400)
         return res
     
     res = make_response("", 201)
-    return res
-
-@twiliotest_api.errorhandler(404)
-def not_found(e):
-    res = make_response("/" + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json", 404)
     return res
 
 if __name__ == "__main__":
