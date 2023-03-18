@@ -79,14 +79,14 @@ test-linux-py39:                                                      # name of 
     - if: $CI_COMMIT_TAG                                              # If a tag is set, it's because the release was just created, we don't need to run this job again
       when: never
       
-    # - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
-    #   changes: *changes                                               # Execute this job only if the files we care about have changed
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
-    #                                                                   # yield the same result, because this job is part of the first stage.
-    # - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
-    #   changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful.
-                                                                      # Added this if to make sure that these jobs run when a pipeline is manually run from the UI
+    - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
+      changes: *changes                                               # Execute this job only if the files we care about have changed
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+                                                                      # yield the same result, because this job is part of the first stage.
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
+                                                                 
 
     - when: never                                                     # If not criteria were matched, do not run this job
   
@@ -110,14 +110,14 @@ test-linux-py310:                                                     # name of 
     - if: $CI_COMMIT_TAG                                              # If a tag is set, it's because the release was just created, we don't need to run this job again
       when: never
       
-    # - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
-    #   changes: *changes                                               # Execute this job only if the files we care about have changed
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
-    #                                                                   # yield the same result, because this job is part of the first stage.
-    # - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
-    #   changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful.
-                                                                      # Added this if to make sure that these jobs run when a pipeline is manually run from the UI
+    - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
+      changes: *changes                                               # Execute this job only if the files we care about have changed
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+                                                                      # yield the same result, because this job is part of the first stage.
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
+                                                                      
 
     - when: never                                                     # If not criteria were matched, do not run this job
   
@@ -138,10 +138,7 @@ test-win-py310:                                                       # name of 
   tags:
     - shared-win                                                      # use runner with this tag
   rules:
-    # - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev and if the files we care about have changes
-    #   changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
-                                                                      # yield the same result, because this job is part of the first stage.
+                                                                     
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success                                                # Execute job if jobs from previous stage are successful.
@@ -212,10 +209,6 @@ build-test:
   script: *script-build-e2e
 
   rules:
-    - if: $CI_COMMIT_BRANCH == "user-registrations"                    # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
-      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-      when: on_success                                                # Execute job if jobs from previous stage are successful.
-
     - if: $CI_COMMIT_BRANCH == "dev"                                  # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success                                                # Execute job if jobs from previous stage are successful.
