@@ -13,7 +13,7 @@ logger.addHandler(Config.stout_handler)
 
 class TwilioSender:
     def __init__(self):
-        self.url = Config.twilio_url + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json"
+        self.url = Config.twilio_url + "/" + os.environ.get("TWILIO_ACCOUNT_SID") + "/Messages.json"
         
         basic_auth = os.environ.get("TWILIO_ACCOUNT_SID") + ":" + os.environ.get("TWILIO_AUTH_TOKEN")
         basic_auth_bytes = basic_auth.encode("utf-8")
@@ -164,7 +164,7 @@ class TwilioSender:
             logger.warning("twilio request experienced an SSL error")
             return None
         except Exception as e:
-            logger.error("twilio request encountered an unexcpected error")
+            logger.error("twilio request encountered an unexpected error")
             logger.error(e)
             return None
 

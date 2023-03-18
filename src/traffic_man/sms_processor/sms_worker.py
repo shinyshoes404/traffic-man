@@ -185,15 +185,16 @@ class SMSWorker:
         elif sms_msg.auto_status == "sub" and (not sms_user.origin_place_id or not sms_user.dest_place_id):
             sms_user.status = "needs setup"
         
-        if sms_user.auth_status != "auth":
-            logger.info("user is not authorized - checking message for auth status")
-            if SMSWorker._check_auth(sms_msg):
-                logger.info("user provided the correct pass phrase - authorizing")
-                sms_user.auth_status = "auth"
-                sms_user.new_auth = True
-            else:
-                logger.info("user did not provide the correct pass phrase")
-                sms_user.auth_status = "not auth"
+        if sms_msg.auto_status == "not-auto":
+            if sms_user.auth_status != "auth":
+                logger.info("user is not authorized - checking message for auth status")
+                if SMSWorker._check_auth(sms_msg):
+                    logger.info("user provided the correct pass phrase - authorizing")
+                    sms_user.auth_status = "auth"
+                    sms_user.new_auth = True
+                else:
+                    logger.info("user did not provide the correct pass phrase")
+                    sms_user.auth_status = "not auth"
 
 
     @staticmethod
