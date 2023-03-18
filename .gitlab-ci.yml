@@ -57,9 +57,10 @@ stages:
   - mkdir $env:userprofile\.traffic-man
   - python -m pip install --upgrade pip
   - pip install -e .[dev]
-  - export REDIS_PW='redispw'
-  - export REDIS_HOST='127.0.0.1'
-  - export REDIS_PORT='6379'
+  - "[System.Environment]::SetEnvironmentVariable('REDIS_PW', 'redispw')"
+  - "[System.Environment]::SetEnvironmentVariable('REDIS_HOST', '127.0.0.1')"
+  - "[System.Environment]::SetEnvironmentVariable('REDIS_PORT', '6379')"
+  - "[System.Environment]::SetEnvironmentVariable('REDIS_DB', '0')"
   - export REDIS_DB='0'
   - coverage run --source=src -m unittest discover -v -s tests/unit
   - coverage run -a --source=src -m unittest discover -v -s tests/integration
