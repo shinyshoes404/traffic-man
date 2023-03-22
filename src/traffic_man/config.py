@@ -10,10 +10,7 @@ class Config:
         etc_basedir = os.path.join(etc_basedir, '../../')
     
     else:
-        if platform.system() == "Linux":
-            etc_basedir = '/etc/traffic-man'
-        elif platform.system() == "Windows":
-            etc_basedir = "C:\\Users\\" + os.getlogin() + "\\.traffic-man"
+        etc_basedir = '/etc/traffic-man'
   
     db_path = os.path.join(etc_basedir, "traffic_man.db")
 
