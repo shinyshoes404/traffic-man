@@ -159,4 +159,4 @@ class Config:
     if os.environ.get("TRAFFIC_MAN_ENV") == "test":
         twilio_url = "http://twiliotest-api:8000"
     else:
-        twilio_url = "https://api.twilio.com/2010-04-01/Accounts/"
+        twilio_url = "https://api.twilio.com/2010-04-01/Accounts"
