@@ -69,11 +69,29 @@ class PlaceFinder(Googler):
             "input": search_text,
             "fields": "formatted_address,type,place_id",
             "inputtype": "textquery",
-            "key": os.environ.get("GOOGLE_API_KEY")
+            "key": os.environ.get("GOOGLE_PLACES_API_KEY")
         }     
 
         self.base_url = Config.place_finder_base_url   
         self._encode_params()
+    
+    def search_for_place_id(self):
+        search_data = self.google_call_with_retry(2)
+        if not search_data:
+            return { "search_status": "api error", "msg": "encountered an error with the api", "addr": None, "place_id": None, "results_count": 0 }
+        if search_data.get("status") == "ZERO_RESULTS":
+            return { "search_status": "no results", "msg": "no reults returned for search", "addr": None, "place_id": None, "results_count": 0}
+        if search_data.get("status") == "OK":
+            return {
+                "search_status" : "ok", 
+                "msg" : "found results",
+                "addr": search_data.get("candidates")[0].get("formatted_address"),
+                "place_id": search_data.get("candidates")[0].get("place_id"),
+                "results_count": len(search_data.get("candidates"))
+            }
+        
+        return { "search_status": "unknown error", "msg": "encountered and unknown error", "addr": None,  "place_id": None, "results_count": 0}
+    
         
 
 class MapGoogler(Googler):
@@ -90,7 +108,7 @@ class MapGoogler(Googler):
             "mode": Config.mode,
             "language": Config.language,
             "departure_time": "now",
-            "key": os.environ.get("GOOGLE_API_KEY")
+            "key": os.environ.get("GOOGLE_DISTANCE_MATRIX_API_KEY")
         }
         
         self._encode_params()

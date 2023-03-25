@@ -9,7 +9,7 @@ from datetime import datetime
 class TestMapGoogler(TestCase):
     
     ### ---------------- MapGoogler.__init__() ----------------    
-    @mock.patch.dict(os.environ, {"GOOGLE_API_KEY":"fake-api-key"})
+    @mock.patch.dict(os.environ, {"GOOGLE_DISTANCE_MATRIX_API_KEY":"fake-api-key"})
     def test_init_verify_vars(self):
         with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
             mock_config.mode = "fake-mode"
