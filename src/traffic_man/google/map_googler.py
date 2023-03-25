@@ -11,10 +11,77 @@ logger.setLevel(Config.log_level)
 logger.addHandler(Config.file_handler)
 logger.addHandler(Config.stout_handler)
 
-class MapGoogler:
+
+class Googler:
+    def __init__(self):
+        self.googler_type = None
+        self.params = None
+        self.base_url = None
+        self.params_urlencode = None
+        
+        
+    def _encode_params(self) -> None:
+        self.params_urlencode = urllib.parse.urlencode(self.params, safe=":/")
+
+    def _call_google_api(self) -> dict:
+        logger.info("attempting to call google {0} api".format(self.googler_type))
+
+        try:
+            resp = requests.get(url=self.base_url + self.params_urlencode)
+            resp_data = resp.json()
+        except requests.exceptions.Timeout:
+            logger.warning("google {0} api request timed out".format(self.googler_type))
+            return None
+        except requests.exceptions.SSLError:
+            logger.warning("google {0} api request experienced SSL error".format(self.googler_type))
+            return None
+        except Exception as e:
+            logger.error("google {0} api request experienced an unexpected exception".format(self.googler_type))
+            logger.error(e)
+            return None
+        
+        if resp.status_code != 200:
+            logger.error("problem with google {0} request status code: {1} content: {2}".format(self.googler_type, resp.status_code, resp.content))
+            return None
+        
+        logger.info("google {0} api data retreived".format(self.googler_type))
+        return resp_data
+    
+    def google_call_with_retry(self, attempts: int) -> dict:
+        # attempts = total attempts, not just retries
+        for i in range(0,attempts):
+            raw_data = self._call_google_api()
+            if raw_data:
+                return raw_data
+            if i < max(range(0, attempts)):
+                logger.warning("wait before we retry")
+                sleep(10 * (i + 1))
+                logger.warning("retrying google {0} api call".format(self.googler_type))
+
+        return None
+
+
+class PlaceFinder(Googler):
+    def __init__(self, search_text: str):        
+        super().__init__()
+        self.googler_type = "place-finder"
+        self.params = {
+            "input": search_text,
+            "fields": "formatted_address,type,place_id",
+            "inputtype": "textquery",
+            "key": os.environ.get("GOOGLE_API_KEY")
+        }     
+
+        self.base_url = Config.place_finder_base_url   
+        self._encode_params()
+        
+
+class MapGoogler(Googler):
 
     def __init__(self, origin_list:str, dest_list:str):
-        self.base_url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
+        super().__init__()
+        self.googler_type = "maps"
+        self.base_url = Config.distance_matrix_base_url
         # expecting origin_list and dest_list to be strings of the format "place_id:abc1234|place_id:def5678"
         self.params = {            
             "origins": origin_list,
@@ -25,45 +92,9 @@ class MapGoogler:
             "departure_time": "now",
             "key": os.environ.get("GOOGLE_API_KEY")
         }
-
-        self.params_urlencode = urllib.parse.urlencode(self.params, safe=":/")
-    
-    def _call_google_maps(self):
-        logger.info("attempting to call google maps api")
-
-        try:
-            resp = requests.get(url=self.base_url + self.params_urlencode)
-            resp_data = resp.json()
-        except requests.exceptions.Timeout:
-            logger.warning("google maps api request timed out")
-            return None
-        except requests.exceptions.SSLError:
-            logger.warning("google maps api request experienced SSL error")
-            return None
-        except Exception as e:
-            logger.error("google maps api request experienced an unexpected exception")
-            logger.error(e)
-            return None
         
-        if resp.status_code != 200:
-            logger.error("problem with google maps request status code: {0} content: {1}".format(resp.status_code, resp.content))
-            return None
-        
-        logger.info("google maps data retreived")
-        return resp_data
+        self._encode_params()
     
-    def google_call_with_retry(self, attempts: int) -> dict:
-        # attempts = total attempts, not just retries
-        for i in range(0,attempts):
-            raw_maps_data = self._call_google_maps()
-            if raw_maps_data:
-                return raw_maps_data
-            if i < max(range(0, attempts)):
-                logger.warning("wait before we retry retry")
-                sleep(10 * (i + 1))
-                logger.warning("retrying google maps api call")
-
-        return None
     
     @staticmethod
     def build_orig_dest_lists(orig_dest_set):
