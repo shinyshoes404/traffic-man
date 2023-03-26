@@ -174,7 +174,7 @@ build-test:
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success   
 
-    - if: $CI_COMMIT_BRANCH == "main" && $CI_COMMIT_MESSAGE =~ /run e2e$/ # on demand e2e on commit when the message ends with run e2e
+    - if: $CI_COMMIT_MESSAGE =~ /run e2e$/ # on demand e2e on commit when the message ends with run e2e
       when: on_success
 
     - when: never                                                     # If no criteria were matched, do not run this job
@@ -202,7 +202,7 @@ cleanup:
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: always   
 
-    - if: $CI_COMMIT_BRANCH == "main" && $CI_COMMIT_MESSAGE =~ /run e2e$/ # on demand e2e on commit when the message ends with run e2e
+    - if: $CI_COMMIT_MESSAGE =~ /run e2e$/ # on demand e2e on commit when the message ends with run e2e
       when: always
 
     - when: never
