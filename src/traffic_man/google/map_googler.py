@@ -70,7 +70,7 @@ class PlaceFinder(Googler):
             "fields": "formatted_address,type,place_id",
             "inputtype": "textquery",
             "key": os.environ.get("GOOGLE_PLACES_API_KEY"),
-            "locationbias": "circle:" + os.environ.get("GOOGLE_PLACES_RADIUS_METERS") + "@" + os.environ.get("GOOGLE_PLACES_LATITUDE") + "," + os.environ.get("GOOGLE_PLACES_LONGITUDE")
+            "locationbias": "".join(filter(None, ["circle:", os.environ.get("GOOGLE_PLACES_RADIUS_METERS"), "@", os.environ.get("GOOGLE_PLACES_LATITUDE"), ",", os.environ.get("GOOGLE_PLACES_LONGITUDE")]))
         }     
 
         self.base_url = Config.place_finder_base_url   
