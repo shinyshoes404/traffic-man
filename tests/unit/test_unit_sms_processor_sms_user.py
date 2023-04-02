@@ -30,7 +30,9 @@ class TestSMSMsg(TestCase):
             "origin_place_id": None,
             "dest_place_id": None,
             "status": "subscribe",
-            "auth_status": "not auth"
+            "auth_status": "not auth",
+            "origin_place_id_confirmed": "no",
+            "dest_place_id_confirmed": "no"
         }
         with mock.patch('traffic_man.sms_processor.sms_user.SMSDataMgr.get_user_by_phone_num', return_value=fake_user_results) as mock_get_user:
             mock_db_req_q = mock.Mock()
@@ -43,3 +45,5 @@ class TestSMSMsg(TestCase):
             self.assertEqual(test_sms_user.dest_place_id, fake_user_results["dest_place_id"])
             self.assertEqual(test_sms_user.status, fake_user_results["status"])
             self.assertEqual(test_sms_user.auth_status, fake_user_results["auth_status"])
+            self.assertEqual(test_sms_user.dest_place_id_confirmed, fake_user_results["dest_place_id_confirmed"])
+            self.assertEqual(test_sms_user.origin_place_id_confirmed, fake_user_results["origin_place_id_confirmed"])

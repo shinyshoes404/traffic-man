@@ -4,6 +4,7 @@ from traffic_man.sms_processor.sms_messages import SMSMsg
 from traffic_man.sms_processor.sms_user import SMSUser
 from traffic_man.sms_processor.sms_data_manager import SMSDataMgr
 from traffic_man.twilio.twilio import TwilioSender
+from traffic_man.google.map_googler import PlaceFinder
 import os, datetime
 
 # Logging setup
@@ -101,14 +102,15 @@ class SMSWorker:
     @staticmethod
     def _set_user(sms_user: SMSUser, db_req_q: Queue, db_res_sms_q: Queue) -> None:        
         if sms_user.new_user:
-            if SMSDataMgr.set_user_by_phone_num(db_req_q, db_res_sms_q, True, sms_user.phone_num, sms_user.status, sms_user.auth_status):
+            if SMSDataMgr.set_user_by_phone_num(db_req_q, db_res_sms_q, sms_user):
                 logger.info("created user with these characteristics | phone number: {0}| status: {1} | auth status: {2}".format(sms_user.phone_num, sms_user.status, sms_user.auth_status))                                    
             else:
                 logger.error("failed to create user for phone number: {0}".format(sms_user.phone_num))
                 sms_user.user_error = True           
         else:
-            if SMSDataMgr.set_user_by_phone_num(db_req_q, db_res_sms_q, False, sms_user.phone_num, sms_user.status, sms_user.auth_status, sms_user.origin_place_id, sms_user.dest_place_id):
-                logger.info("updated user with these characteristics | phone number: {0}| status: {1} | auth status: {2}".format(sms_user.phone_num, sms_user.status, sms_user.auth_status))                                    
+            if SMSDataMgr.set_user_by_phone_num(db_req_q, db_res_sms_q, sms_user):
+                logger.info("updated user with these characteristics | phone number: {0}| status: {1} | auth status: {2} | origin_place_id: {3} | origin id conf: {4} | dest_place_id: {5} | dest conf: {6}".format(
+                    sms_user.phone_num, sms_user.status, sms_user.auth_status, sms_user.origin_place_id, sms_user.origin_place_id_confirmed, sms_user.dest_place_id, sms_user.dest_place_id_confirmed))                                    
             else:
                 logger.error("failed to updated user for phone number: {0}".format(sms_user.phone_num))
                 sms_user.user_error = True
@@ -174,15 +176,73 @@ class SMSWorker:
                 SMSWorker._send_needs_setup_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
             else:
                 SMSWorker._send_user_info_sms(ts, sms_user, db_req_q, db_res_sms_q)
-            
+
+     
+    @staticmethod
+    def _search_place_id(sms_msg: SMSMsg, sms_user: SMSUser) -> str:
+        pf = PlaceFinder(sms_msg.sms_body)
+        logger.info("attempting to search for place id based on '{0}' for {1}".format(sms_msg.sms_body, sms_user.phone_num))
+        place_finder_results = pf.search_for_place_id()
+        logger.info("search results: {0}".format(place_finder_results))
+
+        sms_user.place_id_search_status = place_finder_results.get("search_status")
+        if sms_user.place_id_search_status == "ok":
+            sms_user.place_id_formatted_addr = place_finder_results.get("addr")
+            return place_finder_results.get("place_id")
+
+        return None
+
+    
+    @staticmethod
+    def _setup_place_id(sms_msg: SMSMsg, sms_user: SMSUser) -> None:        
+        if sms_user.origin_place_id:
+            if sms_user.origin_place_id_confirmed != "yes":
+                if sms_msg.sms_body.replace(" ", "").lower() == "yes":
+                    logger.info("user confirmed origin address")
+                    sms_user.origin_place_id_confirmed = "yes"
+                else:
+                    logger.info("user did not confirm origin address - search again")
+                    place_id_search_result = SMSWorker._search_place_id(sms_msg, sms_user)                    
+                    if place_id_search_result:
+                        logger.info("setting origin place id to {0}".format(place_id_search_result))
+                        sms_user.origin_place_id = place_id_search_result
+                    else:
+                        logger.warning("problem searching for place id")
+                        sms_user.place_id_search_status = "error"
+
+            elif sms_user.dest_place_id:
+                if sms_user.dest_place_id_confirmed != "yes":
+                    if sms_msg.sms_body.replace(" ","").lower() == "yes":
+                        logger.info("user confirmed destination address")
+                        sms_user.dest_place_id_confirmed = "yes"
+                    else:
+                        logger.info("user did not confirm destination address - search again")
+                        place_id_search_result = SMSWorker._search_place_id(sms_msg, sms_user)
+                        if place_id_search_result:
+                            logger.info("setting destination place id to {0}".format(place_id_search_result))
+                            sms_user.dest_place_id = place_id_search_result
+                        else:
+                            logger.warning("problem searching for place id")
+                            sms_user.place_id_search_status = "error"
+                            
+        else:
+            logger.info("searching for origin place id")
+            place_id_search_result = SMSWorker._search_place_id(sms_msg, sms_user)
+            if place_id_search_result:
+                logger.info("setting origin place id to {0}".format(place_id_search_result))
+                sms_user.origin_place_id = place_id_search_result
+            else:
+                logger.warning("problem searching for place id")
+                sms_user.place_id_search_status = "error"
+
 
     @staticmethod
     def _update_user_attributes(sms_user: SMSUser, sms_msg: SMSMsg) -> None:
         if sms_msg.auto_status == "unsub":
             sms_user.status = "unsub"
-        elif sms_msg.auto_status == "sub" and sms_user.origin_place_id and sms_user.dest_place_id:
+        elif sms_msg.auto_status == "sub" and sms_user.origin_place_id_confirmed == "yes" and sms_user.dest_place_id_confirmed == "yes":
             sms_user.status = "sub"
-        elif sms_msg.auto_status == "sub" and (not sms_user.origin_place_id or not sms_user.dest_place_id):
+        elif sms_msg.auto_status == "sub" and (sms_user.origin_place_id_confirmed == "no" or sms_user.dest_place_id_confirmed == "no"):
             sms_user.status = "needs setup"
         
         if sms_msg.auto_status == "not-auto":
@@ -195,6 +255,10 @@ class SMSWorker:
                 else:
                     logger.info("user did not provide the correct pass phrase")
                     sms_user.auth_status = "not auth"
+            elif sms_user.auth_status == "auth" and sms_user.status == "needs setup":
+                logger.info("user needs setup - run place id search routine")
+                SMSWorker._setup_place_id(sms_msg, sms_user)
+
 
 
     @staticmethod
@@ -218,7 +282,6 @@ class SMSWorker:
 
                     if sms_user.user_error:
                         logger.error("error creating user object with phone number: {0}".format(sms_msg.from_num))
-
                     
                     # log the inbound sms with appropriate categorization
                     SMSWorker._log_inbound_sms(sms_msg, db_req_q, db_res_sms_q)
@@ -226,7 +289,7 @@ class SMSWorker:
                     # set appropriate user attributes based on received message
                     SMSWorker._update_user_attributes(sms_user, sms_msg)
                      
-                    # create or update (for new) user
+                    # create or update user
                     SMSWorker._set_user(sms_user, db_req_q, db_res_sms_q)
 
                     # send sms (will determine if appropriate)

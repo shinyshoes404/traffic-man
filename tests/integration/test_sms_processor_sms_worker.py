@@ -13,7 +13,7 @@ logger.addHandler(Config.file_handler)
 
 
         
-
+@mock.patch("traffic_man.sms_processor.sms_worker.PlaceFinder")
 @mock.patch.dict(os.environ, {"TRAFFIC_MAN_CODE": "my secret phrase"})
 @mock.patch("traffic_man.sms_processor.sms_worker.TwilioSender")
 @mock.patch("traffic_man.db.db_worker.Config.db_path", new_callable=mock.PropertyMock)
@@ -31,7 +31,7 @@ class TestSMSWorker(TestCase):
 
             db_engine_thread = threading.Thread(name="db-engine", target=db_worker, args=[kill_q, db_req_q, db_res_traffic_eng_q, db_res_sms_q])
             db_engine_thread.start()
-            sleep(1)
+            sleep(0.75)
 
             sms_proc_thread = threading.Thread(name="sms-proc", target=SMSWorker.sms_worker, args=[kill_q, db_req_q, db_res_sms_q, inbound_sms_q])
             sms_proc_thread.start()
@@ -39,7 +39,7 @@ class TestSMSWorker(TestCase):
             for sms_obj in sms_obj_list:
                 inbound_sms_q.put(sms_obj)
 
-            sleep(0.7) # let everything work through the system
+            sleep(1.75) # let everything work through the system
 
             kill_q.put("kill") # stop all threads
 
@@ -69,7 +69,7 @@ class TestSMSWorker(TestCase):
             os.remove(self.test_db_location)
     
 
-    def test_int_invalid_phone_number(self, mock_db_path, mock_twilio_sender):
+    def test_int_invalid_phone_number(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location
@@ -114,7 +114,7 @@ class TestSMSWorker(TestCase):
         self.assertEqual(len(phone_num_rows), 0)
         
 
-    def test_int_sub_new_user(self, mock_db_path, mock_twilio_sender):
+    def test_int_sub_new_user(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location
@@ -169,7 +169,7 @@ class TestSMSWorker(TestCase):
         self.assertEqual(phone_num_rows[0][4], "not auth")
 
 
-    def test_int_new_user_successful_auth(self, mock_db_path, mock_twilio_sender):
+    def test_int_new_user_successful_auth(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location
@@ -224,7 +224,7 @@ class TestSMSWorker(TestCase):
         self.assertEqual(phone_num_rows[0][4], "auth")
 
 
-    def test_int_new_sub_existing_successful_auth(self, mock_db_path, mock_twilio_sender):
+    def test_int_new_sub_existing_successful_auth(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location
@@ -301,7 +301,7 @@ class TestSMSWorker(TestCase):
 
 
 
-    def test_int_new_unsub_existing_unsub(self, mock_db_path, mock_twilio_sender):
+    def test_int_new_unsub_existing_unsub(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location
@@ -364,7 +364,7 @@ class TestSMSWorker(TestCase):
         self.assertEqual(phone_num_rows[0][4], "not auth")
 
 
-    def test_int_new_info_not_auth_existing_auth_sucess_existing_info_existing_needs_setup_existing_info(self, mock_db_path, mock_twilio_sender):
+    def test_int_new_info_not_auth_existing_auth_sucess_existing_info_existing_needs_setup_existing_info(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location
@@ -496,7 +496,7 @@ class TestSMSWorker(TestCase):
         self.assertEqual(phone_num_rows[0][4], "auth")
 
 
-    def test_int_new_unsub_existing_info_existing_auth_existing_sub(self, mock_db_path, mock_twilio_sender):
+    def test_int_new_unsub_existing_info_existing_auth_existing_sub(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location    
@@ -610,20 +610,20 @@ class TestSMSWorker(TestCase):
         self.assertEqual(sms_rows[5][5], sms_object_5["Body"])
         self.assertEqual(sms_rows[5][6], sms_object_5["From"][:12])
 
-        self.assertEqual(sms_rows[6][2], "subscribe")
+        self.assertEqual(sms_rows[6][2], "needs setup")
         self.assertEqual(sms_rows[6][3], "sent")
         self.assertEqual(sms_rows[6][4], "outbound")
-        self.assertEqual(sms_rows[6][5], "test sub")
+        self.assertEqual(sms_rows[6][5], "test needs setup")
         self.assertEqual(sms_rows[6][6], sms_object_5["From"][:12])
 
         self.assertEqual(len(phone_num_rows), 1)
         self.assertEqual(phone_num_rows[0][0], sms_object_1["From"])
-        self.assertEqual(phone_num_rows[0][3], "sub")
+        self.assertEqual(phone_num_rows[0][3], "needs setup")
         self.assertEqual(phone_num_rows[0][4], "auth")
 
 
 
-    def test_int_new_sub_exist_notauth_exist_auth_success_exist_needs_setup_exist_authed_setup(self, mock_db_path, mock_twilio_sender):
+    def test_int_new_sub_exist_notauth_exist_auth_success_exist_needs_setup_exist_authed_setup(self, mock_db_path, mock_twilio_sender, mock_place_finder):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location    
@@ -631,6 +631,8 @@ class TestSMSWorker(TestCase):
         mock_twilio_sender.return_value.send_auth_success_sms.return_value = (True, "test auth success")
         mock_twilio_sender.return_value.send_user_info_sms.return_value = (True, "test info")
         mock_twilio_sender.return_value.send_need_auth_sms.return_value = (True, "test need auth")
+
+        mock_place_finder.return_value.search_for_place_id.return_value = { "search_status": "no results", "msg": "no reults returned for search", "addr": None, "place_id": None, "results_count": 0}
 
         sms_object_1 = {
             "Body": "start",

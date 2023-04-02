@@ -84,7 +84,9 @@ class UserData:
             "origin_place_id": results_data[0][1],
             "dest_place_id": results_data[0][2],
             "status": results_data[0][3],
-            "auth_status": results_data[0][4]
+            "auth_status": results_data[0][4],
+            "origin_place_id_confirmed": results_data[0][5],
+            "dest_place_id_confirmed": results_data[0][6]
             }        
         logger.info("found {0} users".format(len(results_data)))
         logger.info("user data: {0}".format(results_dict))
