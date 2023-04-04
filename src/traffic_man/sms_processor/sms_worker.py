@@ -233,7 +233,7 @@ class SMSWorker:
     def _setup_place_id(sms_msg: SMSMsg, sms_user: SMSUser) -> None:        
         if sms_user.origin_place_id:
             if sms_user.origin_place_id_confirmed != "yes":
-                if sms_msg.sms_body.replace(" ", "").lower() == "yes":
+                if sms_msg.sms_body.replace(" ", "").lower() == "correct":
                     logger.info("user confirmed origin address")
                     sms_user.origin_place_id_confirmed = "yes"
                 else:
@@ -247,7 +247,7 @@ class SMSWorker:
 
             elif sms_user.dest_place_id:
                 if sms_user.dest_place_id_confirmed != "yes":
-                    if sms_msg.sms_body.replace(" ","").lower() == "yes":
+                    if sms_msg.sms_body.replace(" ","").lower() == "correct":
                         logger.info("user confirmed destination address")
                         sms_user.dest_place_id_confirmed = "yes"
                     else:

@@ -83,7 +83,7 @@ class TwilioSender:
 
     def send_need_auth_sms(self, phone_num: str) -> tuple[bool, str]:
         logger.info("attempting to send need auth sms to {0}".format(phone_num))
-        body = "Pass phrase needed. We need you to send us the correct pass phrase before we set you up with Traffic Man."
+        body = "Pass phrase needed. We need you to send us the correct pass phrase to proceed with Traffic Man."
 
         if not self.send_sms_with_retry(2, body, phone_num):
             logger.error("failed to send auth needed sms to {0}".format(phone_num))
@@ -174,7 +174,7 @@ class TwilioSender:
     
     def send_addr_check(self, sms_user: SMSUser) -> tuple[bool, str]:
         logger.info("attempting to send address confirmation sms to {0}".format(sms_user.phone_num))
-        body = "Is this address correct? \n {0} \n Reply YES, if it's correct. If not, reply with a more specific location".format(sms_user.place_id_formatted_addr)
+        body = "Is this address correct? \n {0} \n If yes, reply CORRECT. If not, reply with a more specific location".format(sms_user.place_id_formatted_addr)
 
         if not self.send_sms_with_retry(2, body, sms_user.phone_num):
             logger.error("failed to send addr confirm sms to {0}".format(sms_user.phone_num))
