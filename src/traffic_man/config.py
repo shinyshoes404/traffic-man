@@ -74,6 +74,14 @@ class Config:
     language = "en"
     logger.info("google language param defaulting to: {0}".format(language))
 
+
+
+    place_finder_base_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?"
+    distance_matrix_base_url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
+
+
+
+
     ### --- TRAFFIC_MAN_PARAMS --- ###
     # traffic overage parameter
     try:

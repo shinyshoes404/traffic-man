@@ -18,17 +18,20 @@ class SMSDataMgr:
         sms_data = [{"datetime": msg_datetime, "sms_type": sms_type, "status": sms_status, "direction": sms_direction, "msg_content": sms_msg, "phone_num": from_num}]
         msg = {"msg-id": msg_id, "msg-src": SMSDataMgr.msg_src, "command": "WRITE_SMS_RECORDS", "class-args": [], "method-args": [sms_data]}
 
+        logger.debug("log sms PUT {0}".format(msg))
+
         db_req_q.put(msg)
         try:
             resp_msg = db_res_sms_q.get(timeout=10)
         except Empty:
-            logger.error("sms processor response queue is empty and timed out")
+            logger.error("log sms - sms processor response queue is empty and timed out")
             return False
 
         if resp_msg.get("msg-id") != msg_id:
             logger.error("the msg-id does not match")
             return False
-
+        
+        logger.debug("log sms - RESULT - {0}".format(resp_msg))
         return resp_msg.get("results")
     
     @staticmethod
@@ -40,7 +43,7 @@ class SMSDataMgr:
         try:
             resp_msg = db_res_sms_q.get(timeout=10)
         except Empty:
-            logger.error("sms processor response queue is empty and timed out")
+            logger.error("get user - sms processor response queue is empty and timed out")
             return False
 
         if resp_msg.get("msg-id") != msg_id:
@@ -50,38 +53,31 @@ class SMSDataMgr:
         return resp_msg.get("results")
 
     @staticmethod
-    def set_user_by_phone_num(db_req_q, db_res_sms_q, new_flag: bool, phone_num: str, status: str = None, auth_status: str = None, origin_place_id: str = None, dest_place_id: str = None):
+    def set_user_by_phone_num(db_req_q: Queue, db_res_sms_q: Queue, sms_user):
         msg_id = str(uuid.uuid4())
 
-        user_data = {"phone_num": phone_num}
-        
-        if new_flag:
-            user_data["status"] = status
-            user_data["auth_status"] = auth_status
-            user_data["origin_place_id"] = origin_place_id
-            user_data["dest_place_id"] = dest_place_id
-        
-        else:
-            if status:
-                user_data["status"] = status
-            if auth_status:
-                user_data["auth_status"] = auth_status
-            if origin_place_id:
-                user_data["origin_place_id"] = origin_place_id
-            if dest_place_id:
-                user_data["dest_place_id"] = dest_place_id
+        user_data = {
+            "phone_num": sms_user.phone_num, 
+            "status": sms_user.status,
+            "auth_status": sms_user.auth_status,
+            "origin_place_id": sms_user.origin_place_id,
+            "dest_place_id": sms_user.dest_place_id,
+            "origin_place_id_confirmed": sms_user.origin_place_id_confirmed,
+            "dest_place_id_confirmed": sms_user.dest_place_id_confirmed
+            }
 
-        msg = {"msg-id": msg_id, "msg-src": SMSDataMgr.msg_src, "command": "SET_USER_BY_PHONE_NUM", "class-args": [], "method-args": [user_data, new_flag]}
+        msg = {"msg-id": msg_id, "msg-src": SMSDataMgr.msg_src, "command": "SET_USER_BY_PHONE_NUM", "class-args": [], "method-args": [user_data, sms_user.new_user]}
 
+        logger.debug("sms data mgr - PUT - {0}".format(msg))
         db_req_q.put(msg)
         try:
             resp_msg = db_res_sms_q.get(timeout=10)
         except Empty:
-            logger.error("sms processor response queue is empty and timed out")
+            logger.error("set user - sms processor response queue is empty and timed out")
             return False
 
         if resp_msg.get("msg-id") != msg_id:
             logger.error("the msg-id does not match")
             return False
-
+        logger.debug("data mgr response: {0}".format(resp_msg))
         return resp_msg.get("results")
