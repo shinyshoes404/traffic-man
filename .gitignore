@@ -16,4 +16,5 @@ test.py
 sqlite3.exe
 dev_*.py
 dev_*.json
+dev_*.txt
 redis_pw

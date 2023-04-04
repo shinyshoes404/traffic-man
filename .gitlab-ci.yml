@@ -174,12 +174,14 @@ build-test:
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success   
 
+    - if: $CI_COMMIT_MESSAGE =~ /(run e2e)/ # on demand e2e on commit when the message ends with run e2e
+      when: on_success
+
     - when: never                                                     # If no criteria were matched, do not run this job
 
 
 ### ------------------------------------------- CLEANUP JOBS ------------------------------------------ ###
 
-# build job to build docker image and verify it is working
 cleanup:
   stage: cleanup
   image: docker:23.0.1-alpine3.17                                    # I'm not sure if we neeed to use the docker image again to clear out the builds dir
@@ -199,7 +201,10 @@ cleanup:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: always   
-    
+
+    - if: $CI_COMMIT_MESSAGE =~ /(run e2e)/ # on demand e2e on commit when the message ends with run e2e
+      when: always
+
     - when: never
 
 

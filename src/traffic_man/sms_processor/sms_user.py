@@ -17,6 +17,8 @@ class SMSUser:
         self.db_res_sms_q = db_res_sms_q
         self._build_user()
         self.new_auth = False
+        self.place_id_search_status = None
+        self.place_id_formatted_addr = None
 
     def _build_user(self) -> None:
         get_user_result = SMSDataMgr.get_user_by_phone_num(self.phone_num, self.db_req_q, self.db_res_sms_q)
@@ -31,6 +33,8 @@ class SMSUser:
                 self.dest_place_id = get_user_result["dest_place_id"]
                 self.status = get_user_result["status"]
                 self.auth_status = get_user_result["auth_status"]
+                self.origin_place_id_confirmed = get_user_result["origin_place_id_confirmed"]
+                self.dest_place_id_confirmed = get_user_result["dest_place_id_confirmed"]
                               
             else:
                 self.new_user = True
@@ -38,4 +42,6 @@ class SMSUser:
                 self.dest_place_id = None
                 self.status = "needs setup"
                 self.auth_status = "not auth"
+                self.origin_place_id_confirmed = "no"
+                self.dest_place_id_confirmed = "no"
 
