@@ -71,8 +71,8 @@ class SMSWorker:
 
 
     @staticmethod
-    def _send_needs_setup_sms(ts: TwilioSender, phone_num: str, db_req_q: Queue, db_res_sms_q: Queue) -> None:
-        sent_status, sms_body = ts.send_needs_setup_sms(phone_num)
+    def _send_needs_setup_sms(ts: TwilioSender, sms_user: SMSUser, db_req_q: Queue, db_res_sms_q: Queue) -> None:
+        sent_status, sms_body = ts.send_needs_setup_sms(sms_user)
         if sent_status:
             sms_status = "sent"
         else:
@@ -168,7 +168,7 @@ class SMSWorker:
             if sms_user.auth_status == "not auth":
                 SMSWorker._send_need_auth(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
             elif sms_user.status == "needs setup":
-                SMSWorker._send_needs_setup_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
+                SMSWorker._send_needs_setup_sms(ts, sms_user, db_req_q, db_res_sms_q)
             else:
                 SMSWorker._send_sub_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
 
@@ -176,7 +176,7 @@ class SMSWorker:
             if sms_user.auth_status == "not auth":
                 SMSWorker._send_need_auth(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
             elif sms_user.status == "needs setup":
-                SMSWorker._send_needs_setup_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
+                SMSWorker._send_needs_setup_sms(ts, sms_user, db_req_q, db_res_sms_q)
             else:
                 SMSWorker._send_user_info_sms(ts, sms_user, db_req_q, db_res_sms_q)
 
@@ -197,7 +197,7 @@ class SMSWorker:
             elif sms_user.place_id_formatted_addr:
                 SMSWorker._send_addr_check(ts, sms_user, db_req_q, db_res_sms_q)
             elif sms_user.status == "needs setup":
-                SMSWorker._send_needs_setup_sms(ts, sms_user.phone_num, db_req_q, db_res_sms_q)
+                SMSWorker._send_needs_setup_sms(ts, sms_user, db_req_q, db_res_sms_q)
             else:
                 SMSWorker._send_user_info_sms(ts, sms_user, db_req_q, db_res_sms_q)
 
