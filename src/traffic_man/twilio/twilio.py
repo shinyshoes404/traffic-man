@@ -3,6 +3,7 @@ from traffic_man.config import Config
 from traffic_man.sms_processor.sms_user import SMSUser
 from datetime import datetime
 from time import sleep
+from textwrap import dedent
 
 # Logging setup
 import logging
@@ -71,7 +72,7 @@ class TwilioSender:
 
     def send_sub_sms(self, phone_num: str) -> tuple[bool, str]:
         logger.info("attempting to send sub sms to {0}".format(phone_num))
-        body = "You are subscribed to Traffic Man."
+        body = "You are subscribed to Traffic Man. You can unsubscribe anytime by replying STOP."
 
         if not self.send_sms_with_retry(2, body, phone_num):
             logger.error("failed to send sub sms to {0}".format(phone_num))
@@ -82,7 +83,7 @@ class TwilioSender:
 
     def send_need_auth_sms(self, phone_num: str) -> tuple[bool, str]:
         logger.info("attempting to send need auth sms to {0}".format(phone_num))
-        body = "Pass phrase needed. We need you to send us the pass phrase before we set you up with Traffic Man."
+        body = "Pass phrase needed. We need you to send us the correct pass phrase before we set you up with Traffic Man."
 
         if not self.send_sms_with_retry(2, body, phone_num):
             logger.error("failed to send auth needed sms to {0}".format(phone_num))
@@ -104,7 +105,11 @@ class TwilioSender:
 
     def send_auth_success_sms(self, phone_num: str) -> tuple[bool, str]:
         logger.info("attempting to send auth success sms to {0}".format(phone_num))
-        body = "Pass phrase is correct! Your phone number has been added to Traffic Man."
+        body = dedent("""
+            Authenticated! Let’s setup your origin.
+            Reply with an address, location, or city/state.
+            Ex: 2500 Victory Ave, Dallas, TX | American Airline Center | Dallas, TX
+            """.strip("\n"))
 
         if not self.send_sms_with_retry(2, body, phone_num):
             logger.error("failed to send auth success sms to {0}".format(phone_num))
@@ -124,12 +129,33 @@ class TwilioSender:
         return True, body
 
 
-    def send_needs_setup_sms(self, phone_num: str) -> tuple[bool, str]:
-        logger.info("attempting to send needs setup sms to {0}".format(phone_num))
-        body = "You need to setup your origin and destination."
+    def send_needs_setup_sms(self, sms_user: SMSUser) -> tuple[bool, str]:
+        logger.info("attempting to send needs setup sms to {0}".format(sms_user.phone_num))
+        if sms_user.origin_place_id_confirmed != "yes":
+            msg_segment = "Setup your origin."
+        else:
+            msg_segment = "Setup your destination."
 
-        if not self.send_sms_with_retry(2, body, phone_num):
-            logger.error("failed to send needs setup sms to {0}".format(phone_num))
+        body = dedent("""
+                {0}
+                Reply with an address, location, or city/state.
+                Ex: 2500 Victory Ave, Dallas, TX | American Airline Center | Dallas, TX 
+                """.format(msg_segment).strip("\n"))
+
+        if not self.send_sms_with_retry(2, body, sms_user.phone_num):
+            logger.error("failed to send needs setup sms to {0}".format(sms_user.phone_num))
+            return False, body
+        
+        return True, body
+
+
+    def send_no_results_sms(self, sms_user: SMSUser) -> tuple[bool, str]:
+        logger.info("attempting to send needs setup sms to {0}".format(sms_user.phone_num))
+    
+        body = "No matching addresses were found. You may need to be more specific."
+
+        if not self.send_sms_with_retry(2, body, sms_user.phone_num):
+            logger.error("failed to send needs setup sms to {0}".format(sms_user.phone_num))
             return False, body
         
         return True, body
@@ -144,7 +170,18 @@ class TwilioSender:
             return False, body
         
         return True, body
+    
+    
+    def send_addr_check(self, sms_user: SMSUser) -> tuple[bool, str]:
+        logger.info("attempting to send address confirmation sms to {0}".format(sms_user.phone_num))
+        body = "Is this address correct? \n {0} \n Reply YES, if it's correct. If not, reply with a more specific location".format(sms_user.place_id_formatted_addr)
+
+        if not self.send_sms_with_retry(2, body, sms_user.phone_num):
+            logger.error("failed to send addr confirm sms to {0}".format(sms_user.phone_num))
+            return False, body
         
+        return True, body     
+       
 
     def send_sms(self, body: str, phone_num: str) -> bool:
         logger.info("attempting to send sms")

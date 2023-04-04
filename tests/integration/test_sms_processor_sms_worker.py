@@ -627,10 +627,11 @@ class TestSMSWorker(TestCase):
         test_id = str(uuid.uuid4())
         logger.info(test_id + "-START")
         mock_db_path.return_value = self.test_db_location    
-        mock_twilio_sender.return_value.send_needs_setup_sms.return_value = (True, "test needs setup")
+        # mock_twilio_sender.return_value.send_needs_setup_sms.return_value = (True, "test needs setup")
         mock_twilio_sender.return_value.send_auth_success_sms.return_value = (True, "test auth success")
         mock_twilio_sender.return_value.send_user_info_sms.return_value = (True, "test info")
         mock_twilio_sender.return_value.send_need_auth_sms.return_value = (True, "test need auth")
+        mock_twilio_sender.return_value.send_no_results_sms.return_value = (True, "test no results")
 
         mock_place_finder.return_value.search_for_place_id.return_value = { "search_status": "no results", "msg": "no reults returned for search", "addr": None, "place_id": None, "results_count": 0}
 
@@ -746,10 +747,10 @@ class TestSMSWorker(TestCase):
         self.assertEqual(sms_rows[6][5], sms_object_4["Body"])
         self.assertEqual(sms_rows[6][6], sms_object_4["From"][:12])
 
-        self.assertEqual(sms_rows[7][2], "needs setup")
+        self.assertEqual(sms_rows[7][2], "no results")
         self.assertEqual(sms_rows[7][3], "sent")
         self.assertEqual(sms_rows[7][4], "outbound")
-        self.assertEqual(sms_rows[7][5], "test needs setup")
+        self.assertEqual(sms_rows[7][5], "test no results")
         self.assertEqual(sms_rows[7][6], sms_object_4["From"][:12])
 
         self.assertEqual(sms_rows[8][1], sms_object_5["received_datetime"])
