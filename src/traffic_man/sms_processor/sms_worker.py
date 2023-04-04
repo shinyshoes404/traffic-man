@@ -299,6 +299,8 @@ class SMSWorker:
             elif sms_user.auth_status == "auth" and sms_user.status == "needs setup":
                 logger.info("user needs setup - run place id search routine")
                 SMSWorker._setup_place_id(sms_msg, sms_user)
+                if sms_user.dest_place_id_confirmed == "yes" and sms_user.origin_place_id_confirmed == "yes":
+                    sms_user.status = "sub"
 
 
 
