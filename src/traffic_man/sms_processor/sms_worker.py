@@ -242,8 +242,8 @@ class SMSWorker:
                     if place_id_search_result[1]:
                         logger.info("setting origin place id to {0}".format(place_id_search_result[1]))
                         sms_user.origin_place_id = place_id_search_result[1]
-                    else:
-                        SMSWorker._set_id_search_status(place_id_search_result, sms_user)
+                    
+                    SMSWorker._set_id_search_status(place_id_search_result, sms_user)
 
             elif sms_user.dest_place_id:
                 if sms_user.dest_place_id_confirmed != "yes":
@@ -256,16 +256,16 @@ class SMSWorker:
                         if place_id_search_result[1]:
                             logger.info("setting destination place id to {0}".format(place_id_search_result[1]))
                             sms_user.dest_place_id = place_id_search_result[1]
-                        else:
-                            SMSWorker._set_id_search_status(place_id_search_result, sms_user)
+                        
+                        SMSWorker._set_id_search_status(place_id_search_result, sms_user)
             else:
                 logger.info("searching for destination place id")
                 place_id_search_result = SMSWorker._search_place_id(sms_msg, sms_user)
                 if place_id_search_result[1]:
                     logger.info("setting destination place id to {0}".format(place_id_search_result[1]))
                     sms_user.dest_place_id = place_id_search_result[1]
-                else:
-                    SMSWorker._set_id_search_status(place_id_search_result, sms_user)
+                
+                SMSWorker._set_id_search_status(place_id_search_result, sms_user)
                                 
         else:
             logger.info("searching for origin place id")
@@ -273,8 +273,8 @@ class SMSWorker:
             if place_id_search_result[1]:
                 logger.info("setting origin place id to {0}".format(place_id_search_result[1]))
                 sms_user.origin_place_id = place_id_search_result[1]
-            else:
-                SMSWorker._set_id_search_status(place_id_search_result, sms_user)
+            
+            SMSWorker._set_id_search_status(place_id_search_result, sms_user)
 
 
     @staticmethod
