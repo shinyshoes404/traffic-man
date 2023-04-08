@@ -106,8 +106,10 @@ class TwilioSender:
     def send_auth_success_sms(self, phone_num: str) -> tuple[bool, str]:
         logger.info("attempting to send auth success sms to {0}".format(phone_num))
         body = dedent("""
-            Authenticated! Let’s setup your origin.
+            Authenticated! Setup your work address.
+
             Reply with an address, location, or city/state.
+
             Ex: 2500 Victory Ave, Dallas, TX | American Airline Center | Dallas, TX
             """.strip("\n"))
 
@@ -138,7 +140,9 @@ class TwilioSender:
 
         body = dedent("""
                 {0}
+
                 Reply with an address, location, or city/state.
+
                 Ex: 2500 Victory Ave, Dallas, TX | American Airline Center | Dallas, TX 
                 """.format(msg_segment).strip("\n"))
 
@@ -174,7 +178,7 @@ class TwilioSender:
     
     def send_addr_check(self, sms_user: SMSUser) -> tuple[bool, str]:
         logger.info("attempting to send address confirmation sms to {0}".format(sms_user.phone_num))
-        body = "Is this address correct? \n {0} \n If yes, reply CORRECT. If not, reply with a more specific location".format(sms_user.place_id_formatted_addr)
+        body = "Is this address correct?\n{0}\n\nIf yes, reply CORRECT. \n\nIf not, reply with a more specific location".format(sms_user.place_id_formatted_addr)
 
         if not self.send_sms_with_retry(2, body, sms_user.phone_num):
             logger.error("failed to send addr confirm sms to {0}".format(sms_user.phone_num))
