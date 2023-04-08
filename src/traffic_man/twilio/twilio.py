@@ -134,9 +134,9 @@ class TwilioSender:
     def send_needs_setup_sms(self, sms_user: SMSUser) -> tuple[bool, str]:
         logger.info("attempting to send needs setup sms to {0}".format(sms_user.phone_num))
         if sms_user.origin_place_id_confirmed != "yes":
-            msg_segment = "Setup your origin."
+            msg_segment = "Setup your work address."
         else:
-            msg_segment = "Setup your destination."
+            msg_segment = "Setup your home address."
 
         body = dedent("""
                 {0}
