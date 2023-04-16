@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='traffic-man',
-    version='1.1.0-beta.2',
+    version='1.1.0-beta.3',
     description="An application that checks for bad traffic between two points using the Google Maps API at set times and sends SMS notifications using Twilio.",
     long_description=readme_long_description,
     long_description_content_type="text/markdown",

@@ -294,7 +294,7 @@ class SMSWorker:
                     sms_user.auth_status = "auth"
                     sms_user.new_auth = True
                 else:
-                    logger.info("user did not provide the correct pass phrase")
+                    logger.warning("user did not provide the correct pass phrase")
                     sms_user.auth_status = "not auth"
             elif sms_user.auth_status == "auth" and sms_user.status == "needs setup":
                 logger.info("user needs setup - run place id search routine")

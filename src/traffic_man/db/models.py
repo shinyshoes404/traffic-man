@@ -72,13 +72,3 @@ sms_data = db.Table(
         db.Column('msg_content', db.String(160), nullable=False),
         db.Column('phone_num', db.String(12), nullable=False)
 )
-
-action_attempts = db.Table(
-        'action_attempts',
-        metadata_obj,
-        db.Column('auth_id', db.Integer, primary_key=True),
-        db.Column('datetime', db.String(16), nullable=False),
-        db.Column('status', db.String(15), nullable=False),
-        db.Column('phone_num', db.String(12), nullable=False)
-
-)
