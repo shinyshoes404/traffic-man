@@ -108,12 +108,12 @@ __Note:__ Never put your real API keys and phone numbers in the .env-template fi
  - With your desired python virtual environment active, navigate to the root of this project in your terminal of choice.
  - Run `pip install -e .[dev]` to install traffic man, its dependencies, and testing tools.
  - To start traffic man you can run `start-traffic-man` in your terminal.  
- __Note:__ This will run the full application and start printing log statements to the terminal. It will also call the Google Maps and Twilio APIs with the crendentials you provided, which could result in charges to your account.
+ __Note:__ This will run the full application and start printing log statements to the terminal. It will also call the Google Maps and Twilio APIs with the credentials you provided, which could result in charges to your account.
      
-#### Build the redis image and run the container
+#### Build the Redis image and run the container
  - In order to conduct local end to end testing with the inbound API, you need a Redis stream available.
- - You can leverage multi-stage build to create a separate redis image to use for development and testing that should behave exactly like it will in production.
- - Commands to build image and start redis container
+ - You can leverage multi-stage build to create a separate Redis image to use for development and testing that should behave exactly like it will in production.
+ - Commands to build image and start Redis container
     - `export DOCKER_BUILDKIT=1` 
     - `docker build --no-cache --target redis_stage -t traffic-man-redis-testing .`
     - Run container - assumes REDIS_PW environment variable is set in your dev environment
@@ -125,7 +125,7 @@ __Note:__ Never put your real API keys and phone numbers in the .env-template fi
  - Run the suite of integration tests and add coverage results to those captured during the unit test execution with `coverage run -a --source=src -m unittest discover -v -s tests/integration`
  - Generate an html report to see which modules and lines have test coverage by running the command `coverage html`
      - You can now navigate to the htmlcov directory that was created, and open the index.html file in your browser to see a report of test coverage and which lines of code still need to be covered (highlighted in red).
- - The .gitlab-ci.yml file included in this project is used to automate testing accross multiple environments on a private Gitlab server. This file could be modified for use on your own Gitlab server or gitlab.com, but will have no effect on Github.
+ - The .gitlab-ci.yml file included in this project is used to automate testing across multiple environments on a private Gitlab server. This file could be modified for use on your own Gitlab server or gitlab.com, but will have no effect on Github.
     - You will notice an in this file that there is a `build-e2e` job which will build the traffic-man docker image, simulate requests coming into the API, and provides a mock Twilio API to simulate SMS messages being sent during the sign up and authentication process. All of the files that control this testing process can be found in `/tests/End2End/`.
 
 ## Nginx and Lets Encrypt
@@ -174,7 +174,7 @@ server {
         - Decide whether you want to share your email address with the Electronic Frontier Foundation
         - Enter the number that corresponds to the domain name you put in the trafficman config file
         - If everything goes well, you should see messages in the console indicating that your certificate was successfully retrieved and deployed.
- - Your server should now be ready to recieve https connections and pass them the traffic-man API
+ - Your server should now be ready to receive https connections and pass them the traffic-man API
 
 ## Release notes
 
