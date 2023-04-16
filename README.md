@@ -51,7 +51,7 @@ __Highlights__
      - Move into the root of this project and run `docker build -t traffic-man:latest .` to build the docker image
  - Start the application
      - While still in the root of this project, run `docker-compose up -d` to start the traffic man container
-     - A docker volume will be setup to perist the SQLite .db file and the log file
+     - A docker volume will be setup to persist the SQLite .db file and the log file
      - Run `docker ps` to verify that your container is running
  - You should now be able to send SMS messages to the Twilio phone number configured to send incoming messages to your traffic man server and sign up for alerts.
 
@@ -93,11 +93,11 @@ __Process diagram__
          - Once the bad traffic threshold is passed, traffic man will look for travel time to drop below 50% of the bad traffic threshold. If traffic man identifies that travel time has dropped below that threshold, it will send another SMS indicating that traffic conditions have improved.  
          __Example:__ If your overage parameter is set at 0.5, once the travel time with traffic exceeds 1.5 times the normal travel time, a bad traffic SMS message will send. Once the travel time with traffic drops below 1.25 times the normal travel time, a traffic resolved SMS message will be sent.  
     - Set the `TRAFFIC_MAN_CHECK_TIMES` variable. This indicates what times each day you want traffic man to check traffic conditions. If this variable is not set, traffic man will default to checking every 15 minutes starting at 4:00 PM (16:00), with the last check at 7:30 PM (19:30). Check times must be listed in the format `HH:MM` and need to be separated by a `|`.
-    - Update the `TRAFFIC_MAN_HOLIDAYS` variable to include any holidays you want, so traffic man won't check traffic conditions on those days. These values should follow the formate `yyyy-mm-dd` and are separated by a `|`.
+    - Update the `TRAFFIC_MAN_HOLIDAYS` variable to include any holidays you want, so traffic man won't check traffic conditions on those days. These values should follow the format `yyyy-mm-dd` and are separated by a `|`.
     - Change the `TRAFFIC_MAN_CHECK_DAYS` variable to set the days of the week you want traffic man to check traffic conditions. Days should be listed as lowercase full spellings separated by a `|`.
     - The FROM_NUM variable will be the from phone number setup in your Twilio account. Phone numbers must follow the format of `+<country code><phonenumber including area code>` with no spaces or dashes.
     - Change the `TRAFFIC_MAN_ENV` variable to `dev`, so the log and db file will be stored in the project directory.  
-        __Note:__ You will want to change this valud back to `prod` before starting your docker container in a production environment.
+        __Note:__ You will want to change this value back to `prod` before starting your docker container in a production environment.
     - You can set the TRAFFIC_MAN_LOG_LEVEL variable to `debug` for more detailed logging information, or `info` for standard logging.
  - Before running traffic man, you need to export all of the variables you just set into your environment.
      - If you are using bash (or gitbash), run this command `export $(grep -v '^#' .env | xargs)`  __Note:__ The .env-template file is set to use eol=lf. If you copy this template file to create your .env file, make sure that it is using lf for end of line, not crlf. crlf will cause a \r character to be included with your environment variables when using a bash terminal (should only be an issue when running a bash terminal on Windows)
