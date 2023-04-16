@@ -101,7 +101,7 @@ __Process diagram__
     - You can set the TRAFFIC_MAN_LOG_LEVEL variable to `debug` for more detailed logging information, or `info` for standard logging.
  - Before running traffic man, you need to export all of the variables you just set into your environment.
      - If you are using bash (or gitbash), run this command `export $(grep -v '^#' .env | xargs)`  __Note:__ The .env-template file is set to use eol=lf. If you copy this template file to create your .env file, make sure that it is using lf for end of line, not crlf. crlf will cause a \r character to be included with your environment variables when using a bash terminal (should only be an issue when running a bash terminal on Windows)
-__Note:__ Never put your real API keys and phone numbers in the .env-template file. The .env file is included in the .gitignore file, and will not be committed to git history. .env-template is part of the poject, and will be commited to git history.
+__Note:__ Never put your real API keys and phone numbers in the .env-template file. The .env file is included in the .gitignore file, and will not be committed to git history. .env-template is part of the project, and will be committed to git history.
 
 #### Install traffic man
  - It is recommended that you use python virtual environments to keep your dev environment clean.
