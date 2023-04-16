@@ -1,7 +1,7 @@
-import mock, unittest
+from unittest import TestCase, mock
 from traffic_man.google.orig_dest_optimizer import OrigDestOptimizer
 
-class TestOrigDestOptimizer(unittest.TestCase):
+class TestOrigDestOptimizer(TestCase):
 
     ### --------------------- OrigDestOptimizer.__init__() ------------------
     def test_init_confirm_default_values(self):

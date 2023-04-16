@@ -1,7 +1,8 @@
-import unittest, mock, datetime
+from unittest import TestCase, mock
+import datetime
 from traffic_man.db.traffic_data import TrafficData
 
-class TestTrafficData(unittest.TestCase):
+class TestTrafficData(TestCase):
 
     ### --------------------- TrafficData.store_traffic_data() ----------------------
     def test_store_traffic_data_except_on_execute(self):

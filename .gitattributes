@@ -7,3 +7,4 @@ id_rsa eol=lf
 id_rsa.pub eol=lf
 .env eol=lf
 .env-template eol=lf
+.env-test eol=lf

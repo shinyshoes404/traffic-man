@@ -1,14 +1,88 @@
-import mock, unittest, os, requests, urllib.parse
-from traffic_man.google.map_googler import MapGoogler
+from unittest import TestCase, mock
+import os, requests, urllib.parse
+from traffic_man.google.map_googler import MapGoogler, PlaceFinder
 from datetime import datetime
 
 
 
+class TestPlaceFinder(TestCase):
+    ### ---------------- PlaceFinder.__init__() ----------------    
+    @mock.patch.dict(os.environ, {"GOOGLE_PLACES_API_KEY":"fake-api-key", "GOOGLE_PLACES_RADIUS_METERS": "10", "GOOGLE_PLACES_LATITUDE": "22.1234", "GOOGLE_PLACES_LONGITUDE": "-55.1234"})
+    def test_init_verify_vars(self):
+        with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
+            test_search = "random city, usa"
+            test_value = {'input': test_search, 'fields': 'formatted_address,type,place_id', 'inputtype': 'textquery', 'key': 'fake-api-key', "locationbias": "circle:10@22.1234,-55.1234"}              
+            test_obj = PlaceFinder(test_search)
+            self.assertEqual(test_obj.params, test_value)
+            self.assertEqual(test_obj.params_urlencode, urllib.parse.urlencode(test_obj.params, safe=":/"))   
 
-class TestMapGoogler(unittest.TestCase):
+    ### ---------------- PlaceFinder.search_for_place_id() ----------------
+    def test_search_for_place_id_google_call_fail(self):
+        with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
+            test_search = "random city, usa"            
+            test_obj = PlaceFinder(test_search)
+            test_obj.google_call_with_retry = mock.Mock()
+            test_obj.google_call_with_retry.return_value = None
+            test_val = test_obj.search_for_place_id()
+            self.assertEqual(test_val, { "search_status": "api error", "msg": "encountered an error with the api", "addr": None, "place_id": None, "results_count": 0 })
+
+    def test_search_for_place_id_google_call_zero_results(self):
+        with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
+            test_search = "random city, usa"            
+            test_obj = PlaceFinder(test_search)
+            test_obj.google_call_with_retry = mock.Mock()
+            test_obj.google_call_with_retry.return_value = {"candidates": [], "status": "ZERO_RESULTS"}
+            test_val = test_obj.search_for_place_id()
+            self.assertEqual(test_val, { "search_status": "no results", "msg": "no reults returned for search", "addr": None, "place_id": None, "results_count": 0})
+
+    def test_search_for_place_id_google_call_successful_call_multiple_candidate(self):
+        with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
+            test_search = "random city, usa"
+            example_response = {
+                    "candidates": [
+                        {
+                            "formatted_address": "Springfield, MO, USA",
+                            "place_id": "ChIJP5jIRfdiz4cRoA1pHrNs_Ws",
+                            "types": [
+                                "locality",
+                                "political"
+                            ]
+                        },
+                        {
+                            "formatted_address": "Springfield, IL, USA",
+                            "place_id": "ChIJd9HbJB05dYgRIm2ozO6CLOc",
+                            "types": [
+                                "locality",
+                                "political"
+                            ]
+                        }
+                    ],
+                    "status": "OK"
+                }            
+            
+            test_obj = PlaceFinder(test_search)
+            test_obj.google_call_with_retry = mock.Mock()
+            test_obj.google_call_with_retry.return_value = example_response
+            test_val = test_obj.search_for_place_id()
+            self.assertEqual(test_val, { "search_status": "ok", "msg": "found results", "addr": "Springfield, MO, USA", "place_id": "ChIJP5jIRfdiz4cRoA1pHrNs_Ws", "results_count": 2})
+
+
+    def test_search_for_place_id_unknown_error(self):
+        with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
+            test_search = "random city, usa"
+            example_response = { "error": "weird error" }            
+            
+            test_obj = PlaceFinder(test_search)
+            test_obj.google_call_with_retry = mock.Mock()
+            test_obj.google_call_with_retry.return_value = example_response
+            test_val = test_obj.search_for_place_id()
+            self.assertEqual(test_val, { "search_status": "unknown error", "msg": "encountered and unknown error", "addr": None,  "place_id": None, "results_count": 0})
+
+
+class TestMapGoogler(TestCase):
     
     ### ---------------- MapGoogler.__init__() ----------------    
-    @mock.patch.dict(os.environ, {"GOOGLE_API_KEY":"fake-api-key"})
+    @mock.patch.dict(os.environ, {"GOOGLE_DISTANCE_MATRIX_API_KEY":"fake-api-key"})
     def test_init_verify_vars(self):
         with mock.patch("traffic_man.google.map_googler.Config") as mock_config:
             mock_config.mode = "fake-mode"
@@ -20,39 +94,35 @@ class TestMapGoogler(unittest.TestCase):
             self.assertEqual(test_obj.params, test_value)
             self.assertEqual(test_obj.params_urlencode, urllib.parse.urlencode(test_obj.params, safe=":/"))
     
-    ### ---------------- MapGoogler._call_google_maps() ---------------- 
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_call_google_maps_except_timeout(self, mock_init):
+    ### ---------------- Googler._call_google_api() ---------------- 
+    def test_call_google_maps_except_timeout(self):
         with mock.patch("traffic_man.google.map_googler.requests.get", side_effect=requests.exceptions.Timeout) as mock_get:
             test_obj = MapGoogler('place_id:fake-origin-place1|place_id:fake-origin-place2', 'place_id:fake-dest-place1|place_id:fake-dest-place2')
             test_obj.base_url = "fake-url"
             test_obj.params_urlencode = "fake-urlencoded"
 
-            check_val = test_obj._call_google_maps()
+            check_val = test_obj._call_google_api()
             self.assertIs(check_val, None)
 
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_call_google_maps_except_sslerror(self, mock_init):
+    def test_call_google_maps_except_sslerror(self):
         with mock.patch("traffic_man.google.map_googler.requests.get", side_effect=requests.exceptions.SSLError) as mock_get:
             test_obj = MapGoogler('place_id:fake-origin-place1|place_id:fake-origin-place2', 'place_id:fake-dest-place1|place_id:fake-dest-place2')
             test_obj.base_url = "fake-url"
             test_obj.params_urlencode = "fake-urlencoded"
 
-            check_val = test_obj._call_google_maps()
+            check_val = test_obj._call_google_api()
             self.assertIs(check_val, None)
             
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_call_google_maps_except_unknown(self, mock_init):
+    def test_call_google_maps_except_unknown(self):
         with mock.patch("traffic_man.google.map_googler.requests.get", side_effect=Exception("unknown")) as mock_get:
             test_obj = MapGoogler('place_id:fake-origin-place1|place_id:fake-origin-place2', 'place_id:fake-dest-place1|place_id:fake-dest-place2')
             test_obj.base_url = "fake-url"
             test_obj.params_urlencode = "fake-urlencoded"
 
-            check_val = test_obj._call_google_maps()
+            check_val = test_obj._call_google_api()
             self.assertIs(check_val, None)
 
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_call_google_maps_bad_status_code(self, mock_init):
+    def test_call_google_maps_bad_status_code(self):
         with mock.patch("traffic_man.google.map_googler.requests.get") as mock_get:
             mock_get.return_value.status_code = 400
             mock_get.return_value.json.return_value = {"error":"bad request"}
@@ -61,11 +131,10 @@ class TestMapGoogler(unittest.TestCase):
             test_obj.base_url = "fake-url"
             test_obj.params_urlencode = "fake-urlencoded"
 
-            check_val = test_obj._call_google_maps()
+            check_val = test_obj._call_google_api()
             self.assertIs(check_val, None)
 
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_call_google_maps_success(self, mock_init):
+    def test_call_google_maps_success(self):
         with mock.patch("traffic_man.google.map_googler.requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = {"mapsdata":"fake data"}
@@ -73,31 +142,29 @@ class TestMapGoogler(unittest.TestCase):
             test_obj.base_url = "fake-url"
             test_obj.params_urlencode = "fake-urlencoded"
 
-            check_val = test_obj._call_google_maps()
+            check_val = test_obj._call_google_api()
             self.assertEqual(check_val, {"mapsdata":"fake data"})
 
-    ### ---------------- MapGoogler.google_with_retry() ---------------- 
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_google_with_retry_success_first_call(self, mock_init):
-        with mock.patch("traffic_man.google.map_googler.MapGoogler._call_google_maps", return_value={"mapsdata":"fake data"}) as mock_call_google:
+    ### ---------------- Googler.google_with_retry() ---------------- 
+    def test_google_with_retry_success_first_call(self):
+        with mock.patch("traffic_man.google.map_googler.MapGoogler._call_google_api", return_value={"mapsdata":"fake data"}) as mock_call_google:
             test_obj = MapGoogler('place_id:fake-origin-place1|place_id:fake-origin-place2', 'place_id:fake-dest-place1|place_id:fake-dest-place2')
             check_val = test_obj.google_call_with_retry(2)
             self.assertEqual(check_val, {"mapsdata":"fake data"})
             self.assertEqual(mock_call_google.call_count, 1)
 
     @mock.patch("traffic_man.google.map_googler.sleep", return_value=None)
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_google_with_retry_success_second_call(self, mock_init, mock_sleep):
-        with mock.patch("traffic_man.google.map_googler.MapGoogler._call_google_maps", side_effect=[None, {"mapsdata":"fake data"}]) as mock_call_google:
+    def test_google_with_retry_success_second_call(self, mock_sleep):
+        with mock.patch("traffic_man.google.map_googler.MapGoogler._call_google_api", side_effect=[None, {"mapsdata":"fake data"}]) as mock_call_google:
             test_obj = MapGoogler('place_id:fake-origin-place1|place_id:fake-origin-place2', 'place_id:fake-dest-place1|place_id:fake-dest-place2')
             check_val = test_obj.google_call_with_retry(2)
             self.assertEqual(check_val, {"mapsdata":"fake data"})
             self.assertEqual(mock_call_google.call_count, 2)
 
+
     @mock.patch("traffic_man.google.map_googler.sleep", return_value=None)
-    @mock.patch("traffic_man.google.map_googler.MapGoogler.__init__", return_value=None)
-    def test_google_with_retry_success_too_man_calls(self, mock_init, mock_sleep):
-        with mock.patch("traffic_man.google.map_googler.MapGoogler._call_google_maps", side_effect=[None, None]) as mock_call_google:
+    def test_google_with_retry_success_too_many_calls(self, mock_sleep):
+        with mock.patch("traffic_man.google.map_googler.MapGoogler._call_google_api", side_effect=[None, None]) as mock_call_google:
             test_obj = MapGoogler('place_id:fake-origin-place1|place_id:fake-origin-place2', 'place_id:fake-dest-place1|place_id:fake-dest-place2')
             check_val = test_obj.google_call_with_retry(2)
             self.assertIs(check_val, None)

@@ -3,7 +3,9 @@
 # jobs defined for them qualify based on the event (merge, commit, parse commit message)
 
 stages:
-  - test
+  - unit-int-test
+  - build-e2e
+  - cleanup
    
 
 ### ------------------------------------ END OF STAGES ---------------------------------------- ###
@@ -38,28 +40,20 @@ stages:
   - mkdir -p /etc/traffic-man
   - python -m pip install --upgrade pip
   - pip install -e .[dev]
+  - export REDIS_PW='redispw'
+  - export REDIS_HOST='127.0.0.1'
+  - export REDIS_PORT='6379'
+  - export REDIS_DB='0'
   - coverage run --source=src -m unittest discover -v -s tests/unit
+  - coverage run -a --source=src -m unittest discover -v -s tests/integration
   - coverage xml
   - coverage report -m | grep TOTAL
-
-
-# create reusable script for windows tests
-.script-win: &script-win
-  - echo "this is testing"
-  - echo "python version"; python --version
-  - mkdir $env:userprofile\.traffic-man
-  - python -m pip install --upgrade pip
-  - pip install -e .[dev]
-  - coverage run --source=src -m unittest discover -v -s tests/unit
-  - coverage xml
-  - coverage report -m | Select-String "TOTAL"
-
 
 # -------------- end test scripts ------------------ #
 
 # test job for python 3.9 running on linux
 test-linux-py39:                                                      # name of the job
-  stage: test                                                         # the stage the job belongs to
+  stage: unit-int-test                                                         # the stage the job belongs to
   image: python:3.9.8-slim-bullseye                                   # use this docker image to run the job
   tags:
     - shared-linux                                                    # use runner with this tag
@@ -67,14 +61,14 @@ test-linux-py39:                                                      # name of 
     - if: $CI_COMMIT_TAG                                              # If a tag is set, it's because the release was just created, we don't need to run this job again
       when: never
       
-    # - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
-    #   changes: *changes                                               # Execute this job only if the files we care about have changed
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+    - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
+      changes: *changes                                               # Execute this job only if the files we care about have changed
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
                                                                       # yield the same result, because this job is part of the first stage.
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success                                                # Execute job if jobs from previous stage are successful.
-                                                                      # Added this if to make sure that these jobs run when a pipeline is manually run from the UI
+                                                                 
 
     - when: never                                                     # If not criteria were matched, do not run this job
   
@@ -90,7 +84,7 @@ test-linux-py39:                                                      # name of 
 
 # test job for python 3.10 running on linux
 test-linux-py310:                                                     # name of the job
-  stage: test                                                         # the stage the job belongs to
+  stage: unit-int-test                                                         # the stage the job belongs to
   image: python:3.10.1-slim-bullseye                                  # use this docker image to run the job
   tags:
     - shared-linux                                                    # use runner with this tag
@@ -98,14 +92,14 @@ test-linux-py310:                                                     # name of 
     - if: $CI_COMMIT_TAG                                              # If a tag is set, it's because the release was just created, we don't need to run this job again
       when: never
       
-    # - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
-    #   changes: *changes                                               # Execute this job only if the files we care about have changed
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
+    - if: $CI_PIPELINE_SOURCE == "push"                               # Execute this job if the pipeline is initiated by a push. This will include post merge commits.
+      changes: *changes                                               # Execute this job only if the files we care about have changed
+      when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
                                                                       # yield the same result, because this job is part of the first stage.
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
       changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
       when: on_success                                                # Execute job if jobs from previous stage are successful.
-                                                                      # Added this if to make sure that these jobs run when a pipeline is manually run from the UI
+                                                                      
 
     - when: never                                                     # If not criteria were matched, do not run this job
   
@@ -118,34 +112,102 @@ test-linux-py310:                                                     # name of 
         coverage_format: cobertura
         path: coverage.xml
 
-
-# test job for python 3.10 windows
-test-win-py310:                                                       # name of the job
-  stage: test                                                         # the stage the job belongs to
-  image: python:3.10-windowsservercore-1809                           # the docker image to use for running the job
-  tags:
-    - shared-win                                                      # use runner with this tag
-  rules:
-    # - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev and if the files we care about have changes
-    #   changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-    #   when: on_success                                                # Execute job if jobs from previous stage are successful. In this case always and on_success will 
-                                                                      # yield the same result, because this job is part of the first stage.
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"   # Execute this job if the commit target branch is dev or main. This includes pushes from users and post merge commits
-      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
-      when: on_success                                                # Execute job if jobs from previous stage are successful.
-
-    - when: never                                                     # If no criteria were matched, do not run this job
-  
-  script: *script-win                                                 # predefined test script to run
-  coverage: '/^TOTAL.*\s+(\d+\%)$/'
-  artifacts:
-    expire_in: 2 days
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-
-
 # --------------------- jobs ----------------------- #
 
 ### ----------------------------------------- END OF TEST JOBS ----------------------------------------- ###
+
+
+
+# create reusable script for building docker image and testing 
+.script-build-e2e: &script-build-e2e
+  - apk update                                                                                                              # update repository
+  - apk upgrade                                                                                                             # upgrade the system
+  - apk add --no-cache python3 py3-pip                                                                                      # install python
+  - apk add docker-compose                                                                                                  # install docker-compose
+  - export DOCKER_BUILDKIT=1                                                                                                # set docker buildkit env var
+  - docker build -t traffic-man:build .                                                                                # attempt to build the docker image we will test
+  - mkdir -p /builds/mnt/traffic-man-etc                                                                                                   
+  - cd tests/End2End
+  - docker build -t twiliotest-api:latest -f DockerfileTwilioTestAPI .                                                                                                               # move into the tests directory
+  - docker-compose up -d                                                                                                    # stand up our test environment/docker containers described by the docker-compose.yml file in the tests dir
+  - sleep 3                                                                                                                 # give the containers a few seconds to start
+  - docker ps -a                                                                                                            # take a look at the environment we just stood up
+  - ls -lh /builds/mnt/traffic-man-etc
+  - export $(grep -v '^#' .env-test | xargs)
+  - python3 test_script.py
+  - test_api_error=$(cat /builds/mnt/traffic-man-etc/traffic-man.log | { grep -c "\[ERROR\]" || true; })                                                          
+  - |                                                                                                                       # check every 100 seconds to see if the uploads are done; stop looping if any errors are found - note:expecting 2 completed uploads based on app config and size of test upload file
+      echo "---- checking log ----";
+      test_api_error=$(cat /builds/mnt/traffic-man-etc/traffic-man.log | { grep -c "\[ERROR\]" || true; });
+
+      if [[ "$test_api_error" == 0 ]]; 
+        then echo "no errors found in logs";
+        else echo "errors found in logs" && 
+            echo " ------ traffic-man.log ---------" &&
+            cat /builds/mnt/traffic-man-etc/traffic-man.log && 
+            exit 1;
+      fi;
+  - cat /builds/mnt/traffic-man-etc/traffic-man.log                                                             # print the onedrive-offsite.log file
+
+# build job to build docker image and verify it is working
+build-test:
+  stage: build-e2e
+  image: docker:23.0.1-alpine3.17                          # need alpine so we can install and use curl for testing
+  tags:
+    - shared-docker
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+
+  services:
+    - docker:23-dind                                             # this is a second container providing the docker daemon, it can be accessed with just the name 'docker'
+  before_script:
+    - docker info
+
+  script: *script-build-e2e
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"                                  # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success                                                # Execute job if jobs from previous stage are successful.
+
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"               # Execute this job if the merge target branch is dev
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: on_success   
+
+    - if: $CI_COMMIT_MESSAGE =~ /(run e2e)/ # on demand e2e on commit when the message ends with run e2e
+      when: on_success
+
+    - when: never                                                     # If no criteria were matched, do not run this job
+
+
+### ------------------------------------------- CLEANUP JOBS ------------------------------------------ ###
+
+cleanup:
+  stage: cleanup
+  image: docker:23.0.1-alpine3.17                                    # I'm not sure if we neeed to use the docker image again to clear out the builds dir
+  tags:
+    - shared-docker
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+
+  script:
+    - rm -rf /builds/mnt                                              # clear out the builds directory
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"  || $CI_COMMIT_BRANCH == "user-registrations" # Execute this job if the commit target branch is dev. This includes pushes from users and post merge commits
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: always
+
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"               # Execute this job if the merge target branch is dev
+      changes: *changes                                               # Execute the job if any of the files we care about were changed as defined above.
+      when: always   
+
+    - if: $CI_COMMIT_MESSAGE =~ /(run e2e)/ # on demand e2e on commit when the message ends with run e2e
+      when: always
+
+    - when: never
+
+
+
+
+### ------------------------------------------ END CLEANUP JOBS ---------------------------------------- ###

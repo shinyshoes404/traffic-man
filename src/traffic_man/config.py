@@ -10,10 +10,7 @@ class Config:
         etc_basedir = os.path.join(etc_basedir, '../../')
     
     else:
-        if platform.system() == "Linux":
-            etc_basedir = '/etc/traffic-man'
-        elif platform.system() == "Windows":
-            etc_basedir = "C:\\Users\\" + os.getlogin() + "\\.traffic-man"
+        etc_basedir = '/etc/traffic-man'
   
     db_path = os.path.join(etc_basedir, "traffic_man.db")
 
@@ -76,6 +73,14 @@ class Config:
     # the language you want Google to use in its API response
     language = "en"
     logger.info("google language param defaulting to: {0}".format(language))
+
+
+
+    place_finder_base_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?"
+    distance_matrix_base_url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
+
+
+
 
     ### --- TRAFFIC_MAN_PARAMS --- ###
     # traffic overage parameter
@@ -143,3 +148,20 @@ class Config:
     except:
         traffic_check_days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
         logger.info("traffic man check days param defaulted to: {0}".format(traffic_check_days))
+
+    
+    ### -- REDIS PARAMETERS --- ###
+    redis_host = os.environ.get("REDIS_HOST")
+    redis_port = int(os.environ.get("REDIS_PORT"))
+    redis_pw = os.environ.get("REDIS_PW")
+    redis_db = int(os.environ.get("REDIS_DB"))
+    redis_sms_stream_key = "sms_stream"
+    redis_sms_consum_grp = "sms_consum_grp"
+    redis_msg_read_count = 3
+    redis_block_time_ms = 1000
+
+    ### -- TWILIO PARAMETERS --- ###
+    if os.environ.get("TRAFFIC_MAN_ENV") == "test":
+        twilio_url = "http://twiliotest-api:8000"
+    else:
+        twilio_url = "https://api.twilio.com/2010-04-01/Accounts"

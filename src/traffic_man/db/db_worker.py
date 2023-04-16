@@ -13,11 +13,10 @@ logger.setLevel(Config.log_level)
 logger.addHandler(Config.file_handler)
 logger.addHandler(Config.stout_handler)
 
-engine = db.create_engine('sqlite:///' + Config.db_path)
-metadata_obj.create_all(engine)
-
-
-def db_worker(kill_q, db_req_q, db_res_traffic_eng_q):
+def db_worker(kill_q, db_req_q, db_res_traffic_eng_q, db_res_sms_q):
+    engine = db.create_engine('sqlite:///' + Config.db_path)
+    metadata_obj.create_all(engine)
+    
     # db setup - If any of these steps are not successful return, do not move forward
     logger.info("setting up the database")
 
@@ -45,5 +44,9 @@ def db_worker(kill_q, db_req_q, db_res_traffic_eng_q):
             db_op_result = db_ops_map_obj.get("method")(db_obj_instance, *qry_req_msg.get("method-args"))
             if msg_src == "traffic_engine":
                 db_res_traffic_eng_q.put({"msg-id": msg_id, "msg_src": msg_src, "results": db_op_result})
+            if msg_src == "sms_processor":
+                db_res_sms_q.put({"msg-id": msg_id, "msg_src": msg_src, "results": db_op_result})
         except Empty:
             logger.debug("db request queue is empty")
+    
+    logger.info("shutting down db engine")

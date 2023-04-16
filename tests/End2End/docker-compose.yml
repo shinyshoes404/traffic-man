@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  twiliotest-api:
+    image: twiliotest-api:latest
+    tty: true
+    stdin_open: true
+    env_file:
+      - .env-test
+
+  traffic-man:
+    image: traffic-man:build
+    tty: true
+    stdin_open: true
+    volumes:
+      - type: bind
+        source: /builds/mnt/traffic-man-etc
+        target: /etc/traffic-man
+    ports:
+      - "0.0.0.0:8003:8003" 
+    env_file:
+      - .env-test
+

@@ -1,4 +1,5 @@
-import unittest, mock, datetime
+from unittest import TestCase, mock
+import datetime
 from traffic_man.db.sms_data import SMSData
 
 @mock.patch("traffic_man.db.sms_data.datetime")
@@ -6,7 +7,7 @@ from traffic_man.db.sms_data import SMSData
 @mock.patch("traffic_man.db.sms_data.phone_numbers.select")
 @mock.patch("traffic_man.db.sms_data.select")
 @mock.patch("traffic_man.db.sms_data.outerjoin")
-class TestSMSDataGetPhoneNums(unittest.TestCase):
+class TestSMSDataGetPhoneNums(TestCase):
 
     ### --------------------- SMSData.get_phone_nums() ----------------------
     def test_get_phone_nums_except_on_execute(self, mock_outerjoin, mock_select, mock_phone_num_select, mock_sms_data_select, mock_dt):
@@ -70,7 +71,7 @@ class TestSMSDataGetPhoneNums(unittest.TestCase):
 
 @mock.patch("traffic_man.db.sms_data.datetime")
 @mock.patch("traffic_man.db.sms_data.sms_data.insert")
-class TestSMSDataWriteSMSRecords(unittest.TestCase):
+class TestSMSDataWriteSMSRecords(TestCase):
     sms_data_list = [
             {"sms_type": "bad traffic", "status": "sent", "direction": "outbound", "msg_content": "Traffic is looking pretty bad", "phone_num": "+12222222222"},
             {"sms_type": "bad traffic", "status": "sent", "direction": "outbound", "msg_content": "Traffic is looking pretty bad", "phone_num": "+13333333333"},
