@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setup(
     name='traffic-man',
-    version='1.1.0',
-    description="An application that checks for bad traffic between two points using the Google Maps API at set times and sends SMS notifications using Twilio.",
+    version='1.1.1',
+    description="traffic-man is a dockerized application that checks for bad traffic conditions between two points using Google's Distance Matrix API on set days and times and sends SMS notifications to users when traffic conditions exceed a configurable threshold using Twilio. Users authenticate and setup their profile via SMS. traffic-man uses Google's Places API to search for addresses and place ids based on user provided search terms.",
     long_description=readme_long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/shinyshoes404/traffic-man',
